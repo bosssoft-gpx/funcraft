@@ -27,8 +27,8 @@
   ],
   "license": "MIT",
   "files": [
-    "es/**/*",
-    "lib/**/*"
+    "es",
+    "lib"
   ],
   "publishConfig": {
     "access": "public"
