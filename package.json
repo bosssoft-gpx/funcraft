@@ -1,0 +1,45 @@
+{
+  "name": "@gpx/common-funcraft",
+  "version": "0.0.1-beta.0",
+  "description": "Funcraft 是一个模块化前端工具包，集成了高质量 TypeScript 工具函数、可复用的 React hook 以及 Fusion Design 主题样式，助你高效构建现代前端应用",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "types": "es/index.d.ts",
+  "typings": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./es/index.js",
+      "require": "./lib/index.js"
+    },
+    "./es/styles/variables": {
+      "import": "./es/styles/variables.scss"
+    }
+  },
+  "scripts": {
+    "dev": "father dev",
+    "build": "father build",
+    "build:deps": "father prebundle",
+    "prepublishOnly": "father doctor && npm run build"
+  },
+  "keywords": [],
+  "authors": [
+    "Junhao Yang<2522544932@qq.com>"
+  ],
+  "license": "MIT",
+  "files": [
+    "es/**/*",
+    "lib/**/*"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.10",
+    "father": "^4.5.3"
+  },
+  "peerDependencies": {
+    "axios": "^1.7.9",
+    "react": "16",
+    "sass": "^1.85.0"
+  }
+}

@@ -1,0 +1,46 @@
+
+$color-brand1-3: rgba(59, 155, 234, 0.5) !default;
+$color-brand1-6: #0a82e5 !default;
+$color-text1-1: #cccccc !default;
+$color-text1-2: #999999 !default;
+$color-text1-4: #333333 !default;
+
+$c-primary: $color-brand1-6;
+$c-primary-hover: rgba($c-primary, 0.8);
+$c-secondary: $color-brand1-3;
+$c-success: #67c23a;
+$c-warning: #e6a23c;
+$c-danger: #f56c6c;
+$c-info: #909399;
+$c-error: #f56c6c;
+$c-border: $color-text1-1;
+
+$c-box-shadow: rgba(0, 0, 0, 0.15);
+$c-box-shadow-hover: rgba(0, 0, 0, 0.3);
+$c-box-shadow-secondary: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+0 9px 28px 8px rgba(0, 0, 0, 0.05);
+
+$c-text: $color-text1-4;
+$c-text-light: $color-text1-2;
+$c-font-size: 14px;
+$c-line-height: 1.6;
+$c-text-align: left;
+
+$c-z-index-popup-base: 1000;
+
+$c-control-height-xs: 16px;
+$c-control-height-sm: 24px;
+$c-control-height-lg: 40px;
+
+$c-border-radius-xx: 2px;
+$c-border-radius-sm: 4px;
+$c-border-radius-lg: 8px;
+
+$c-margin-xxs: 4px;
+$c-margin-xs: 8px;
+$c-margin-sm: 12px;
+$c-margin: 16px;
+$c-margin-md: 20px;
+$c-margin-lg: 24px;
+$c-margin-xl: 32px;
+$c-margin-xxl: 48px;
