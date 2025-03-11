@@ -12,11 +12,11 @@
 📥 安装
 
 ```sh
-npm install funcraft
+npm install @gpx/common-funcraft
 # 或者使用 yarn
-yarn add funcraft
+yarn add @gpx/common-funcraft
 # 或者使用 pnpm
-pnpm add funcraft
+pnpm add @gpx/common-funcraft
 ```
 
 ## 📜 API 参考
@@ -77,7 +77,7 @@ console.log(isEmpty(0)); // false
 本库提供了一套常用的 **SCSS 变量**，可用于 UI 主题定制。
 
 ```scss
-@use "funcraft/styles/variables"
+@use "@gpx/common-funcraft/styles/variables"
 
 body {
   background-color: variables.$c-primary;
@@ -98,7 +98,7 @@ body {
 
 ```jsx
 import React from "react";
-import { useStateRef } from "funcraft";
+import { useStateRef } from "@gpx/common-funcraft";
 
 const ExampleComponent = () => {
   const [count, setCount, countRef] = useStateRef(0);
@@ -120,7 +120,7 @@ const ExampleComponent = () => {
 ###### **2️⃣ 默认值处理**
 
 ```js
-import { defaultGetter, defaultMerge } from "funcraft";
+import { defaultGetter, defaultMerge } from "@gpx/common-funcraft";
 
 // 获取默认值
 const name = defaultGetter(null, "默认名"); // "默认名"
@@ -133,7 +133,7 @@ const mergedObject = defaultMerge({ age: 25 }, { name: "Alice", age: 30 });
 ###### **3️⃣ 文件大小格式化**
 
 ```js
-import { formatFileSize } from "funcraft";
+import { formatFileSize } from "@gpx/common-funcraft";
 
 console.log(formatFileSize(1024)); // "1.0 KB"
 console.log(formatFileSize(1048576)); // "1.0 MB"
@@ -145,7 +145,7 @@ console.log(formatFileSize(1073741824)); // "1.0 GB"
 ###### **4️⃣ 数字格式化**
 
 ```js
-import { formatNumber } from "funcraft";
+import { formatNumber } from "@gpx/common-funcraft";
 
 console.log(formatNumber(1234567.89)); // "1,234,567.89"
 console.log(formatNumber("1000")); // "1,000.00"
@@ -154,7 +154,7 @@ console.log(formatNumber("1000")); // "1,000.00"
 ###### **5️⃣ 数据验证**
 
 ```js
-import { isEmpty } from "funcraft";
+import { isEmpty } from "@gpx/common-funcraft";
 
 console.log(isEmpty(null)); // true
 console.log(isEmpty("")); // true

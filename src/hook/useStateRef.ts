@@ -39,4 +39,4 @@ const useStateRef = <S>(
     return [state, setState, ref] as const;
 }
 
-export default useStateRef;
+export { useStateRef };

@@ -1,1 +1,1 @@
-export { default as useStateRef } from './useStateRef';
+export * from './useStateRef';
