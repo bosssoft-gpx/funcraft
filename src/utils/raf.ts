@@ -124,7 +124,7 @@ const wrapperRaf = (callback: () => void, times = 1): number => {
  * ```
  */
 wrapperRaf.cancel = (id: number) => {
-    const realId = rafIds.get(id);
+    const realId = rafIds.get(id) as number;
     cleanup(id);
     return caf(realId);
 };

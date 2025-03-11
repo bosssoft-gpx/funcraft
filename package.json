@@ -1,10 +1,10 @@
 {
   "name": "@gpx/common-funcraft",
-  "version": "0.0.2-beta.0",
+  "version": "0.0.3-beta.0",
   "description": "Funcraft 是一个模块化前端工具包，集成了高质量 TypeScript 工具函数、可复用的 React hook 以及 Fusion Design 主题样式，助你高效构建现代前端应用",
   "main": "lib/index.js",
   "module": "es/index.js",
-  "types": "es/index.d.ts",
+  "types": "types/index.d.mts",
   "sideEffects": false,
   "exports": {
     ".": {
@@ -16,10 +16,9 @@
     }
   },
   "scripts": {
-    "dev": "father dev",
-    "build": "father build",
-    "build:deps": "father prebundle",
-    "prepublishOnly": "father doctor && npm run build"
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [],
   "authors": [
@@ -35,8 +34,11 @@
     "registry": "http://49.4.61.217:8081/nexus/content/repositories/gpx-npm-hosted/"
   },
   "devDependencies": {
+    "@swc/core": "^1.11.8",
+    "@types/fs-extra": "^11.0.4",
     "@types/react": "^19.0.10",
-    "father": "^4.5.3"
+    "fs-extra": "^11.3.0",
+    "tsup": "^8.4.0"
   },
   "peerDependencies": {
     "axios": "^1.7.9",

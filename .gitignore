@@ -1,6 +1,7 @@
 /node_modules
 /es
 /lib
+/types
 /.idea
 pnpm-lock.yaml
 .DS_Store
