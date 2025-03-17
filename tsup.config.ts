@@ -36,7 +36,7 @@ export default defineConfig([
         outDir: "types",
         format: "esm",
         dts: { only: true },
-        clean: true,
+        clean: false,
         treeshake: true,
         external: ['react']
     },

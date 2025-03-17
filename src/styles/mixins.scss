@@ -1,0 +1,76 @@
+@mixin scroll-bar {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable; /* 保持滚动条占位，避免内容抖动 */
+
+  /* Firefox 滚动条，默认极浅色，hover 时稍微加深 */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(200, 200, 200, 0.1) transparent;
+
+  /* WebKit 滚动条 */
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(200, 200, 200, 0.1);
+    border-radius: 4px;
+    opacity: 0.5; /* 轻微可见 */
+  }
+
+  /* 鼠标悬浮时，滚动条变成较浅灰色（比默认略深） */
+  &:hover {
+    scrollbar-color: rgba(180, 180, 180, 0.3) transparent;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background: rgba(180, 180, 180, 0.3);
+    opacity: 1;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(180, 180, 180, 0.7);
+  }
+
+  &::-webkit-scrollbar-thumb:active {
+    background: rgba(180, 180, 180, 0.7);
+  }
+}
+
+@mixin gpx-loading {
+  // 修复加载动画在内联模式下的样式问题
+  .next-loading-inline {
+    display: flex;
+    flex: 1;
+
+    min-height: 0;
+
+    .next-loading-wrap {
+      width: 100%;
+      height: 100%;
+    }
+
+    .next-loading-indicator {
+      div {
+        bottom: -40px;
+        line-height: 1.5;
+      }
+    }
+  }
+}
+
+@mixin white-loading {
+  .next-loading-masker {
+    background: white;
+    opacity: 1 !important;
+  }
+}
+
+@mixin full-content {
+  width: 100%;
+  height: 100%;
+}
