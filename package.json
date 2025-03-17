@@ -29,7 +29,9 @@
     "es",
     "lib",
     "types",
-    "README.md"
+    "README.md",
+    "docs",
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public",
