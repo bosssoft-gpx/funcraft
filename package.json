@@ -1,6 +1,6 @@
 {
   "name": "@gpx/common-funcraft",
-  "version": "0.0.5-beta.0",
+  "version": "0.0.6-beta.0",
   "description": "Funcraft 是一个模块化前端工具包，集成了高质量 TypeScript 工具函数、可复用的 React hook 以及 Fusion Design 主题样式，助你高效构建现代前端应用",
   "main": "lib/index.js",
   "module": "es/index.js",

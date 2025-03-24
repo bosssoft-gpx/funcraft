@@ -65,3 +65,69 @@ export const defaultMerge = <T>(source: T | null | undefined, defaultObj: Partia
 
     return result;
 };
+
+/**
+ * 深度提取对象中多层属性的类型。
+ *
+ * @template T 源对象类型。
+ * @template Keys 属性键组成的元组，表示需要读取的嵌套路径。
+ *
+ * 如果给定的键在对象中存在，则返回对应的嵌套属性类型，否则返回 undefined。
+ */
+type DeepValue<
+    T,
+    Keys extends readonly PropertyKey[]
+> = Keys extends [infer K, ...infer Rest]
+    ? K extends keyof T
+        ? Rest extends readonly PropertyKey[]
+            ? DeepValue<T[K], Rest>
+            : T[K]
+        : undefined
+    : T;
+
+/**
+ * 安全地从对象中获取深层嵌套的属性值。
+ *
+ * 此函数接收一个对象以及任意数量的键，并按照给定的键路径依次访问对象属性。
+ * 如果在访问过程中遇到 `null` 或 `undefined`，则返回 `undefined`。
+ *
+ * 该工具函数特别适用于 **不支持可选链操作符（?.）** 的运行环境。
+ *
+ * @template T 源对象的类型。
+ * @template Keys 表示属性路径的键的元组类型。
+ *
+ * @param source 要从中读取嵌套属性的对象。
+ * @param keys 一系列表示嵌套属性路径的键。
+ * @returns 如果嵌套属性存在，则返回其值；否则返回 `undefined`。
+ *
+ * @example
+ * ```ts
+ * interface Data {
+ *   a?: {
+ *     b?: {
+ *       c: number;
+ *     };
+ *   };
+ * }
+ *
+ * const obj: Data = { a: { b: { c: 42 } } };
+ *
+ * // 返回 42
+ * const result1 = call(obj, 'a', 'b', 'c');
+ *
+ * // 返回 undefined，因为属性 'd' 不存在
+ * const result2 = call(obj, 'a', 'd', 'c');
+ * ```
+ */
+
+export function deepGet<T, Keys extends readonly PropertyKey[]>(
+    source: T,
+    ...keys: Keys
+): DeepValue<T, Keys> | undefined {
+    let result: any = source;
+    for (const key of keys) {
+        if (result == null) return undefined;
+        result = result[key];
+    }
+    return result;
+}

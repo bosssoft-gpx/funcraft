@@ -39,6 +39,42 @@ defaultMerge(null, { name: 'Unknown', age: 30 });
 
 ---
 
+### 🔸 deepGet
+
+> **说明**：安全地从对象中获取深层嵌套的属性值，支持任意层级的属性路径。当对象路径中任一属性为 `null` 或 `undefined` 时，返回 `undefined`.
+> 
+> 适用于不支持可选链操作符（?.）的环境.
+
+**示例：**
+
+```ts
+const obj = {
+    user: {
+        profile: {
+            name: 'Alice',
+            address: {
+                city: 'Hangzhou',
+                zip: '310000'
+            }
+        }
+    }
+};
+
+// 正常访问存在的深层属性
+deepGet(obj, 'user', 'profile', 'name');
+// 返回: 'Alice'
+
+// 深层属性不存在，返回 undefined
+deepGet(obj, 'user', 'profile', 'age');
+// 返回: undefined
+
+// 中间路径不存在，安全返回 undefined
+deepGet(obj, 'user', 'contact', 'email');
+// 返回: undefined
+```
+
+---
+
 ## 📂 文件处理 (`file`)
 
 ### 🔸 formatFileSize
