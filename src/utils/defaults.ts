@@ -119,7 +119,6 @@ type DeepValue<
  * const result2 = call(obj, 'a', 'd', 'c');
  * ```
  */
-
 export function deepGet<T, Keys extends readonly PropertyKey[]>(
     source: T,
     ...keys: Keys

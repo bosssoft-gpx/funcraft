@@ -3,3 +3,4 @@ export * from './number';
 export * from './validation';
 export * from './raf';
 export * from './view';
+export * from './array';
