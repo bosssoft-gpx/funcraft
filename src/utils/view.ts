@@ -18,7 +18,7 @@ import { wrapperRaf as raf } from './raf';
  * ```
  */
 export function isWindow(obj: any): obj is Window {
-    return obj !== null && obj !== undefined && obj === obj.window;
+	return obj !== null && obj !== undefined && obj === obj.window;
 }
 
 /**
@@ -63,30 +63,30 @@ export function isWindow(obj: any): obj is Window {
  * ```
  */
 export const getScroll = (target: HTMLElement | Window | Document | null): number => {
-    if (typeof window === 'undefined') {
-        return 0;
-    }
-    let result = 0;
-    if (isWindow(target)) {
-        result = target.pageYOffset;
-    } else if (target instanceof Document) {
-        result = target.documentElement.scrollTop;
-    } else if (target instanceof HTMLElement) {
-        result = target.scrollTop;
-    } else if (target) {
-        // According to the type inference, the `target` is `never` type.
-        // Since we configured the loose mode type checking, and supports mocking the target with such shape below::
-        //    `{ documentElement: { scrollLeft: 200, scrollTop: 400 } }`,
-        //    the program may falls into this branch.
-        // Check the corresponding tests for details. Don't sure what is the real scenario this happens.
-        /* biome-ignore lint/complexity/useLiteralKeys: target is a never type */ /* eslint-disable-next-line dot-notation */
-        result = target['scrollTop'];
-    }
+	if (typeof window === 'undefined') {
+		return 0;
+	}
+	let result = 0;
+	if (isWindow(target)) {
+		result = target.pageYOffset;
+	} else if (target instanceof Document) {
+		result = target.documentElement.scrollTop;
+	} else if (target instanceof HTMLElement) {
+		result = target.scrollTop;
+	} else if (target) {
+		// According to the type inference, the `target` is `never` type.
+		// Since we configured the loose mode type checking, and supports mocking the target with such shape below::
+		//    `{ documentElement: { scrollLeft: 200, scrollTop: 400 } }`,
+		//    the program may falls into this branch.
+		// Check the corresponding tests for details. Don't sure what is the real scenario this happens.
+		/* biome-ignore lint/complexity/useLiteralKeys: target is a never type */ /* eslint-disable-next-line dot-notation */
+		result = target['scrollTop'];
+	}
 
-    if (target && !isWindow(target) && typeof result !== 'number') {
-        result = (target.ownerDocument ?? target).documentElement?.scrollTop;
-    }
-    return result;
+	if (target && !isWindow(target) && typeof result !== 'number') {
+		result = (target.ownerDocument ?? target).documentElement?.scrollTop;
+	}
+	return result;
 };
 
 /**
@@ -122,23 +122,23 @@ export const getScroll = (target: HTMLElement | Window | Document | null): numbe
  * ```
  */
 export function easeInOutCubic(t: number, b: number, c: number, d: number) {
-    const cc = c - b;
-    // biome-ignore lint: it is a common easing function
-    t /= d / 2;
-    if (t < 1) {
-        return (cc / 2) * t * t * t + b;
-    }
-    // biome-ignore lint: it is a common easing function
-    return (cc / 2) * ((t -= 2) * t * t + 2) + b;
+	const cc = c - b;
+	// biome-ignore lint: it is a common easing function
+	t /= d / 2;
+	if (t < 1) {
+		return (cc / 2) * t * t * t + b;
+	}
+	// biome-ignore lint: it is a common easing function
+	return (cc / 2) * ((t -= 2) * t * t + 2) + b;
 }
 
 interface ScrollToOptions {
-    /** Scroll container, default as window */
-    getContainer?: () => HTMLElement | Window | Document;
-    /** Scroll end callback */
-    callback?: () => void;
-    /** Animation duration, default as 450 */
-    duration?: number;
+	/** Scroll container, default as window */
+	getContainer?: () => HTMLElement | Window | Document;
+	/** Scroll end callback */
+	callback?: () => void;
+	/** Animation duration, default as 450 */
+	duration?: number;
 }
 
 /**
@@ -149,8 +149,8 @@ interface ScrollToOptions {
  *
  * ---
  *
- * **@param y** 目标滚动位置（像素值）
- * **@param options** 配置项，包含以下属性：
+ * @param y 目标滚动位置（像素值）
+ * @param options 配置项，包含以下属性：
  *   - `getContainer` (`() => Window | HTMLElement | Document`) **获取滚动容器**（默认 `window`）
  *   - `callback` (`() => void`) **滚动结束后的回调函数**
  *   - `duration` (`number`) **滚动持续时间（默认 `450ms`）**
@@ -175,29 +175,78 @@ interface ScrollToOptions {
  * ```
  */
 export function scrollTo(y: number, options: ScrollToOptions = {}) {
-    const { getContainer = () => window, callback, duration = 450 } = options;
-    const container = getContainer();
-    const scrollTop = getScroll(container);
-    const startTime = Date.now();
+	const { getContainer = () => window, callback, duration = 450 } = options;
+	const container = getContainer();
+	const scrollTop = getScroll(container);
+	const startTime = Date.now();
 
-    const frameFunc = () => {
-        const timestamp = Date.now();
-        const time = timestamp - startTime;
-        const nextScrollTop = easeInOutCubic(time > duration ? duration : time, scrollTop, y, duration);
-        if (isWindow(container)) {
-            (container as Window).scrollTo(window.pageXOffset, nextScrollTop);
-        } else { // @ts-ignore
-            if (container instanceof Document || container.constructor.name === 'HTMLDocument') {
-                        (container as Document).documentElement.scrollTop = nextScrollTop;
-                    } else {
-                        (container as HTMLElement).scrollTop = nextScrollTop;
-                    }
-        }
-        if (time < duration) {
-            raf(frameFunc);
-        } else if (typeof callback === 'function') {
-            callback();
-        }
-    };
-    raf(frameFunc);
+	const frameFunc = () => {
+		const timestamp = Date.now();
+		const time = timestamp - startTime;
+		const nextScrollTop = easeInOutCubic(time > duration ? duration : time, scrollTop, y, duration);
+		if (isWindow(container)) {
+			(container as Window).scrollTo(window.pageXOffset, nextScrollTop);
+		} else { // @ts-ignore
+			if (container instanceof Document || container.constructor.name === 'HTMLDocument') {
+				(container as Document).documentElement.scrollTop = nextScrollTop;
+			} else {
+				(container as HTMLElement).scrollTop = nextScrollTop;
+			}
+		}
+		if (time < duration) {
+			raf(frameFunc);
+		} else if (typeof callback === 'function') {
+			callback();
+		}
+	};
+	raf(frameFunc);
+}
+
+/**
+ * **获取指定元素祖先链中的最大 `z-index` 值**
+ *
+ * 该方法会沿着 DOM 树从给定元素向上查找其祖先元素，获取每个元素的 `z-index`，
+ * 并返回整个祖先链中最大的 `z-index` 数值。
+ *
+ * ---
+ *
+ * @param el 目标元素（作为起始节点进行向上查找）
+ * @param maxDepth 最大查找深度（默认为 `20` 层）
+ *
+ * ---
+ *
+ * **执行逻辑**
+ * 1. 从 `el.parentElement` 开始向上查找
+ * 2. 每个父元素读取其 `z-index` 样式并转换为数字
+ * 3. 比较并记录最大值，直到达到最大查找深度或到达 `<body>`
+ *
+ * ---
+ *
+ * **使用场景**
+ * - 当你需要为某个浮层组件设置 `z-index`，并希望确保其能覆盖当前页面上的元素
+ * - 可用于动态计算并设置 `z-index: getMaxZIndex(el) + 1`
+ *
+ * ---
+ *
+ * **示例**
+ * ```ts
+ * const panel = document.getElementById('progress-panel');
+ * const zIndex = getMaxZIndex(panel); // 比如：返回 10002
+ * panel.style.zIndex = `${zIndex + 1}`;
+ * ```
+ */
+export function getMaxZIndex(el: HTMLElement, maxDepth: number = 20): number {
+	let maxZ = 0;
+	let current: HTMLElement | null = el.parentElement;
+	let depth = 0;
+
+	while (current && current !== document.body && depth < maxDepth) {
+		const zIndex = window.getComputedStyle(current).zIndex;
+		const z = isNaN(Number(zIndex)) ? 0 : Number(zIndex);
+		maxZ = Math.max(maxZ, z);
+		current = current.parentElement;
+		depth++;
+	}
+
+	return maxZ;
 }
