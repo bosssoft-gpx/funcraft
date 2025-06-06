@@ -344,6 +344,91 @@ console.log(flatData);
 
 ---
 
+## 📌 Vue 工具函数
+
+### 🔸 safeRegisterComponents
+
+> **说明**：用于安全地注册 Element UI 的 Vue 组件。该方法会根据组件库版本及 Vue 的全局注册状态，自动判断是否需要局部注册组件，避免重复注册或因未注册导致的渲染异常。
+
+该函数支持以下两种组件声明方式：
+
+- 具名声明（自定义注册名）：
+   `{ ElButton: Button }`
+- 简洁声明（自动使用组件 `.name`）：
+   `{ Button, Dialog }`
+
+可作为组件库内部注册 Element UI 的辅助方法，配合外部版本控制策略，避免组件表现异常。
+
+------
+
+**使用示例：**
+
+```ts
+import Vue from 'vue';
+import { Button, Dialog } from 'element-ui';
+import { safeRegisterComponents } from '@gpx/common-funcraft';
+
+export default {
+  components: {
+    // 支持自动注册名
+    ...safeRegisterComponents(Vue, {
+      Button,
+      Dialog
+    })
+  }
+};
+```
+
+也支持显式注册名：
+
+```ts
+safeRegisterComponents(Vue, {
+  ElButton: Button,
+  ElDialog: Dialog
+});
+```
+
+------
+
+**高级用法：版本门槛控制**
+
+你可以传入 `versionThreshold` 作为第三个参数，控制最小兼容版本：
+
+```ts
+safeRegisterComponents(Vue, {
+  Button,
+  Dialog
+}, {
+  versionThreshold: '2.13.0'
+});
+```
+
+------
+
+**返回值：**
+
+返回一个组件对象，可用于 `components: { ... }` 的局部注册：
+
+```ts
+{
+  ElButton: Button,
+  ElDialog: Dialog
+}
+```
+
+如果所有组件都已在全局注册，或满足最低版本要求，则返回空对象。
+
+------
+
+**适用场景：**
+
+- 构建组件库时使用 Element UI 等组件库的部分组件；
+- 应用方无法保证组件已注册或版本一致时；
+- 希望组件库以最小侵入方式提供所需依赖环境；
+- 避免 `Vue.use()` 或 `Vue.component()` 带来的全局污染。
+
+---
+
 ## 🔗 其他文档索引
 
 - 📌 [React Hook 使用指南](hook.md)
