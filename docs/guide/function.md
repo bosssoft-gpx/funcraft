@@ -429,6 +429,44 @@ safeRegisterComponents(Vue, {
 
 ---
 
+## 📌 对象字段操作 (`object`)
+
+### 🔸 omit
+
+> **说明**：从对象中排除指定的字段，返回一个新的对象，保留原对象中未被排除的字段。适用于在组件开发中去除私有字段、精简传参、构造公共结构等场景。
+
+**示例：**
+
+```ts
+import { omit } from "@gpx/common-funcraft";
+
+const original = { a: 1, b: 2, c: 3 };
+
+// 排除一个字段
+omit(original, ['b']); 
+// => { a: 1, c: 3 }
+
+// 排除多个字段
+omit(original, ['a', 'c']); 
+// => { b: 2 }
+
+// 传入空数组时返回原始对象的副本
+omit(original, []); 
+// => { a: 1, b: 2, c: 3 }
+
+// 对只读字段数组也兼容
+const readonlyFields = ['a'] as const;
+omit(original, readonlyFields); 
+// => { b: 2, c: 3 }
+
+// 不会修改原对象
+const copy = omit(original, ['a']);
+console.log(original); 
+// => { a: 1, b: 2, c: 3 }
+```
+
+---
+
 ## 🔗 其他文档索引
 
 - 📌 [React Hook 使用指南](hook.md)

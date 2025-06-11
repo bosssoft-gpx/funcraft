@@ -50,6 +50,7 @@ export const safeRegisterComponents = (
 
 	if (!Vue || !components) return {};
 
+	// @ts-ignore
 	const elVersion = Vue.prototype?.$ELEMENT?.version;
 	const isVersionLow = elVersion && compareVersion(elVersion, versionThreshold) < 0;
 
@@ -61,6 +62,7 @@ export const safeRegisterComponents = (
 	});
 
 	const shouldRegister = isVersionLow || Object.keys(resolvedComponents).some(name => {
+		// @ts-ignore
 		return !Vue.options.components?.[name];
 	});
 

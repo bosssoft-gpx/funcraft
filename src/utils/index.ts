@@ -6,3 +6,4 @@ export * from './view';
 export * from './array';
 export * from './file';
 export * from './vue';
+export * from './object';

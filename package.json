@@ -1,6 +1,6 @@
 {
   "name": "@gpx/common-funcraft",
-  "version": "0.1.1-beta.0",
+  "version": "0.1.2-beta.0",
   "description": "Funcraft 是一个模块化前端工具包，集成了高质量 TypeScript 工具函数、可复用的 React hook 以及 Fusion Design 主题样式，助你高效构建现代前端应用",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -21,6 +21,9 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
     "prepublishOnly": "npm run build"
   },
   "keywords": [],
@@ -44,9 +47,13 @@
     "@swc/core": "^1.11.8",
     "@types/fs-extra": "^11.0.4",
     "@types/react": "^19.0.10",
+    "@vitest/ui": "^3.2.3",
+    "axios": "^1.9.0",
     "fs-extra": "^11.3.0",
+    "react": "^19.1.0",
     "tsup": "^8.4.0",
-    "vue": "^3.5.16"
+    "vitest": "^3.2.3",
+    "vue": "2"
   },
   "peerDependencies": {
     "axios": "^1.7.9",
