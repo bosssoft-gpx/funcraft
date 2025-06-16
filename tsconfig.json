@@ -11,5 +11,5 @@
     "baseUrl": "./",
     "moduleResolution": "Node"
   },
-  "include": ["src", "tsup.config.ts"]
+  "include": ["src", "tsup.config.ts", "test"]
 }

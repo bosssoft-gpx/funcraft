@@ -79,17 +79,40 @@ deepGet(obj, 'user', 'contact', 'email');
 
 ### 🔸 formatFileSize
 
-> **说明**：格式化文件大小，将字节数转为易读单位（Bytes, KB, MB, GB, TB）。
+> **说明**：格式化文件大小，将字节数转为更易读的单位（Bytes、KB、MB、GB、TB），支持可选配置自定义格式表现。
 
-**示例：**
+#### **函数签名：**
+
+```ts
+function formatFileSize(bytes: number, options?: { omitDecimal?: boolean }): string;
+```
+
+#### **参数说明：**
+
+| 参数名    | 类型                        | 说明                             |
+| --------- | --------------------------- | -------------------------------- |
+| `bytes`   | `number`                    | 要格式化的字节大小，必须为非负数 |
+| `options` | `{ omitDecimal?: boolean }` | 是否省略小数部分，默认为 `false` |
+
+- `omitDecimal: true` 表示仅保留整数部分（自动四舍五入）
+
+#### **返回值：**
+
+- 返回格式化后的字符串，附带单位。例如 `"1.0 KB"`、`"2 MB"`。
+
+------
+
+#### **示例：**
 
 ```ts
 import { formatFileSize } from "@gpx/common-funcraft";
 
-formatFileSize(1024);        // "1.0 KB"
-formatFileSize(1048576);     // "1.0 MB"
-formatFileSize(1073741824);  // "1.0 GB"
-formatFileSize(0);           // "0 Byte"
+formatFileSize(1024);                    // "1.0 KB"
+formatFileSize(1048576);                 // "1.0 MB"
+formatFileSize(1073741824);              // "1.0 GB"
+formatFileSize(0);                       // "0 Byte"
+formatFileSize(1536, { omitDecimal: true }); // "2 KB"
+formatFileSize(1536, { omitDecimal: false }); // "1.5 KB"
 ```
 
 ---

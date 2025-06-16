@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { omit } from 'src';
 
-describe('omit', () => {
+describe('omit 函数', () => {
 	it('should omit a single field', () => {
 		const input = { a: 1, b: 2, c: 3 };
 		const result = omit(input, ['b']);
