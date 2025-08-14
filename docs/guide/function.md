@@ -490,6 +490,225 @@ console.log(original);
 
 ---
 
+## 🔤 字符串模板构建 (`string`)
+
+### 🔸 templateBuilder
+
+> **说明**：用于安全、可扩展地构建字符串模板。
+>  支持 **数字占位符**（`${0}`）、**命名占位符**（`${name}`）、**缺省值策略**（`error | empty | keep`）、**自定义转换器**（如 HTML 转义）、**预编译模板**（提高高频渲染性能）以及 **链式 Builder API**（`add / conditional / when / addWith / reset`）。
+
+**适用场景：**
+
+- 多条件片段拼接（日志、文案、通知消息、SQL/命令片段）
+- 含用户输入的 HTML 片段（仅对占位符值做转义，保留模板结构）
+- 高频重复渲染（列表项、缓存片段）
+- DSL/模版语言替代的轻量方案
+
+------
+
+#### ✅ 核心能力一览
+
+- 占位符：`${0}`（数组） / `${name}`（对象）
+- 缺省策略：
+  - `error`：缺值抛错（默认，开发期更容易暴露问题）
+  - `empty`：缺值替换为空串
+  - `keep`：缺值保留占位符文本
+- 转换器 `transform(value)`：仅处理**占位符的值**（如 HTML 转义）
+- 预编译 `compileTemplate(template)`：避免重复解析正则，提升性能
+- 链式 Builder：`add / addWith / conditional / when / pushRaw / reset / build`
+
+------
+
+#### 使用示例
+
+```ts
+import {
+  TemplateBuilder,
+  interpolate,
+  compileTemplate,
+  escapeHTML,
+} from '@gpx/common-funcraft';
+
+// 1) 单次插值：数字占位符（数组）
+interpolate('Hello ${0}, you are ${1}', ['Alice', 30]);
+// => "Hello Alice, you are 30"
+
+// 2) 单次插值：命名占位符（对象）
+interpolate('User=${name}, Age=${age}', { name: 'Bob', age: 25 });
+// => "User=Bob, Age=25"
+
+// 3) 缺省值策略
+interpolate('X=${0}, Y=${1}', ['A'], { onMissing: 'keep' });
+// => "X=A, Y=${1}"
+
+// 4) 仅对占位符值做 HTML 转义（推荐做法）
+interpolate('<b>${name}</b>', { name: '<Tom & Jerry>' }, {
+  transform: (v) => escapeHTML(String(v ?? '')),
+});
+// => "<b>&lt;Tom &amp; Jerry&gt;</b>"  （模板标签保留，值被安全转义）
+
+// 5) 预编译（高频渲染）
+const renderItem = compileTemplate('ID=${id}, Name=${name}');
+renderItem({ id: 1, name: 'A' }); // => "ID=1, Name=A"
+renderItem({ id: 2, name: 'B' }); // 复用解析结果
+
+// 6) Builder：链式拼接
+const b = new TemplateBuilder();
+b.add('Hello ${name}', { name: 'Carol' })
+ .conditional(true, ', age=${0}', 22)
+ .pushRaw('!')
+ .build();
+// => "Hello Carol, age=22!"
+
+// 7) Builder：when（批量条件逻辑）
+const user = { name: 'Dave', isAdmin: true, bio: '<coder>' };
+new TemplateBuilder({
+  transform: (v) => escapeHTML(String(v ?? '')),
+})
+  .add('Hi ${name}', { name: user.name })
+  .when(user.isAdmin, (bb) => bb.pushRaw(' (Admin)'))
+  .when(user.bio, (bb, bio) => bb.add(' - ${bio}', { bio }))
+  .build();
+// => "Hi Dave (Admin) - &lt;coder&gt;"
+```
+
+------
+
+#### API
+
+##### `interpolate(template, values, options?) => string`
+
+- **说明**：对一次模板进行插值渲染。`values` 为 `unknown[]`（数字占位）或 `Record<string, unknown>`（命名占位）。
+- **参数**
+  - `template: string` 模板字符串（包含 `${...}` 占位符）
+  - `values: unknown[] | Record<string, unknown>`
+  - `options?: { onMissing?: 'error'|'empty'|'keep'; transform?: (v)=>string }`
+- **返回**：渲染后的字符串
+- **特性**：只对**占位符的值**应用 `transform`；模板静态文本不变。
+
+##### `compileTemplate(template, baseOptions?) => (values, overrideOptions?) => string`
+
+- **说明**：预编译模板，返回可复用的渲染函数。适合高频调用的场景。
+- **选项优先级**：调用期的 `overrideOptions` 会覆盖 `baseOptions`。
+- **错误信息**：缺值抛错时包含原始模板片段，便于定位。
+
+##### `escapeHTML(text) => string`
+
+- **说明**：最小必要字符的 HTML 转义（`& < > " '`）。常与 `transform` 搭配。
+
+##### `new TemplateBuilder(options?)`
+
+- **默认选项**：`{ onMissing: 'error', transform: (v) => (v == null ? '' : String(v)) }`
+
+##### `add(template, ...values) / add(template, namedValues)`
+
+- 数组重载：`add('Hi ${0}', 'World')`
+- 对象重载：`add('Hi ${name}', { name: 'World' })`
+
+##### `addWith(template, values, options?)`
+
+- 对**单段**临时覆盖策略/转换器：
+
+  ```ts
+  builder.addWith('<p>${text}</p>', { text: '<b>&</b>' }, {
+    transform: (v) => escapeHTML(String(v ?? '')),
+  });
+  ```
+
+##### `conditional(condition, template, values...)`
+
+- `true` 才会添加该段。
+
+##### `when(condition, fn)`
+
+- `condition` 为真时执行闭包，在闭包内可批量 `add/conditional/pushRaw`。
+
+##### `pushRaw(text)`
+
+- 直接拼接原始文本（无占位）。
+
+##### `reset()`
+
+- 清空已添加的所有片段，便于复用同一实例。
+
+##### `build() / toString()`
+
+- 输出最终字符串。`String(builder)` 等价于 `builder.build()`。
+
+##### `setOptions(options) / getOptions()`
+
+- 运行中更新/读取默认选项（影响后续 `add` / `conditional` 等）。
+
+------
+
+#### 类型签名
+
+```ts
+type MissingStrategy = 'error' | 'empty' | 'keep';
+
+type InterpolateOptions = {
+  onMissing?: MissingStrategy;
+  transform?: (value: unknown) => string;
+};
+
+type ValueBag = unknown[] | Record<string, unknown>;
+
+function interpolate(template: string, values: ValueBag, options?: InterpolateOptions): string;
+
+function compileTemplate(
+  template: string,
+  baseOptions?: InterpolateOptions,
+): (values: ValueBag, override?: InterpolateOptions) => string;
+
+function escapeHTML(input: string): string;
+
+class TemplateBuilder {
+  constructor(options?: InterpolateOptions);
+  add(template: string, ...values: unknown[]): this;
+  add(template: string, values: Record<string, unknown>): this;
+  addWith(template: string, values: ValueBag, options?: InterpolateOptions): this;
+  conditional(condition: boolean, template: string, ...values: unknown[]): this;
+  conditional(condition: boolean, template: string, values: Record<string, unknown>): this;
+  when<T>(condition: T, fn: (builder: this, value: T) => void): this;
+  pushRaw(text: string): this;
+  reset(): this;
+  build(): string;
+  toString(): string;
+  setOptions(options: InterpolateOptions): this;
+  getOptions(): Required<InterpolateOptions>;
+}
+```
+
+------
+
+#### 使用建议
+
+- **开发期**用 `onMissing: 'error'` 快速暴露缺值问题；
+   **生产/容错**可换成 `empty` 或 `keep`。
+- 仅对**占位符值**做转义（`transform`），**不要**整体转义模板文本；
+   真要“整段转义”，请在上层对最终结果调用一次全局转义函数。
+- 高频渲染**一定**用 `compileTemplate` 预编译，避免重复正则解析。
+- 模板复杂、条件多时，优先 `when` 封装成块，提高可读性与可维护性。
+
+------
+
+#### 常见误区
+
+- ❌ 认为 `transform` 会转义整个模板
+   ✅ 它**只处理占位符的值**。模板中的 `<div>...</div>` 不会被转义或改写。
+- ❌ 在“混合占位符”模板中同时传数组与对象给一次 `interpolate`
+   ✅ 一次调用只能选择其一；需要混合时建议拆段，用 `builder.add` 多次拼接。
+
+------
+
+#### 版本迁移提示（若你替换已有模板方案）
+
+- 保留 `${...}` 语法，无需引入重量级模板引擎。
+- 原字符串拼接处可逐步替换为 `interpolate` 或 `TemplateBuilder`，先小范围试点再覆盖全局。
+- 对外显示/日志类内容建议加上统一 `transform`（如 `escapeHTML`）以防注入/乱码。
+
+---
+
 ## 🔗 其他文档索引
 
 - 📌 [React Hook 使用指南](hook.md)

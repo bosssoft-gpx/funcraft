@@ -7,3 +7,4 @@ export * from './array';
 export * from './file';
 export * from './vue';
 export * from './object';
+export * from './templateBuilder';
