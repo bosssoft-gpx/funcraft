@@ -132,7 +132,7 @@ export function easeInOutCubic(t: number, b: number, c: number, d: number) {
 	return (cc / 2) * ((t -= 2) * t * t + 2) + b;
 }
 
-interface ScrollToOptions {
+export interface ScrollToOptions {
 	/** Scroll container, default as window */
 	getContainer?: () => HTMLElement | Window | Document;
 	/** Scroll end callback */

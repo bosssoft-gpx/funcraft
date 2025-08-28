@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "lib": ["ESNext", "DOM"],
+    "types": ["vitest/globals"],
     "strict": true,
     "declaration": true,
     "emitDeclarationOnly": true,
@@ -9,7 +11,13 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "baseUrl": "./",
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "paths": {
+      "src": ["./src"],
+      "src/*": ["./src/*"]
+    },
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["src", "tsup.config.ts", "test"]
+  "include": ["**/*.ts", "**/*.tsx","**/*.d.ts"],
+  "exclude": ["node_modules", "es", "lib"]
 }

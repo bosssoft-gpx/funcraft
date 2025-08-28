@@ -313,6 +313,90 @@ panel.style.zIndex = `${maxZ + 1}`; // 保证进度面板显示在最上层
 
 ---
 
+### 🔸 canAccessIFrame
+
+> **说明**：检测一个 `iframe` 是否**可被同源访问**。内部通过尝试读取 `iframe.contentWindow.document.domain` 并捕获异常来判断，同源返回 `true`，跨域返回 `false`。
+
+#### **函数签名：**
+
+```
+function canAccessIFrame(iframe: HTMLIFrameElement): boolean;
+```
+
+#### **参数说明：**
+
+| 参数名   | 类型                | 说明                             |
+| -------- | ------------------- | -------------------------------- |
+| `iframe` | `HTMLIFrameElement` | 需要检测的目标 `iframe` 元素实例 |
+
+#### **返回值：**
+
+- `boolean`：同源可访问返回 `true`；跨域（或不可访问）返回 `false`。
+   *函数本身不抛错，跨域场景请在上层按需告警或降级处理。*
+
+------
+
+### 🔸 getTargetElement
+
+> **说明**：统一解析“目标”对象，支持**直接元素**、**Ref 对象**、或**返回目标的函数**；无法获取时返回 `defaultElement` 作为兜底。
+
+#### **函数签名：**
+
+```
+function getTargetElement<T extends HTMLElement | Element | Window | Document = Element>(
+  target: BasicTarget<T>,
+  defaultElement?: T
+): T | undefined;
+```
+
+#### **参数说明：**
+
+| 参数名           | 类型             | 说明                                                         |
+| ---------------- | ---------------- | ------------------------------------------------------------ |
+| `target`         | `BasicTarget<T>` | 目标对象：`T` 本身 / `RefObject<T | null>` / `() => T | null` |
+| `defaultElement` | `T`（可选）      | 如果无法从 `target` 获取到有效目标时使用的兜底元素           |
+
+#### **返回值：**
+
+- `T \| undefined`：解析到的目标实例；若解析失败则返回 `defaultElement`；若也未提供兜底，返回 `undefined`。
+
+> 小贴士：该函数每次调用都会**读取 `ref.current` 的当前值**；但要让上层 `effect` 感知到目标变化，仍需让 `effect` 重新执行（例如通过依赖变更）。
+
+------
+
+### 🔸 getScrollTopForChild
+
+> **说明**：计算**将容器滚动到使子元素顶端对齐**所需的 `scrollTop` 值。相较于直接用 `offsetTop`，该方法通过 `getBoundingClientRect` 计算，更适用于复杂布局（如 `transform` / 非标准 `offsetParent`）。
+
+#### **函数签名：**
+
+```
+function getScrollTopForChild(
+  container: HTMLElement | Document | Window,
+  child: HTMLElement
+): number;
+```
+
+#### **参数说明：**
+
+| 参数名      | 类型                              | 说明                                                    |
+| ----------- | --------------------------------- | ------------------------------------------------------- |
+| `container` | `HTMLElement | Document | Window` | 滚动容器；支持页面（`window/document`）或任意可滚动元素 |
+| `child`     | `HTMLElement`                     | 需要滚动到其顶部对齐的子元素（应当是容器的后代元素）    |
+
+#### **返回值：**
+
+- `number`：使子元素顶端与容器可视区域顶边对齐所需设置的 `scrollTop`。
+
+> 备注：
+>
+> - 当 `container` 为 `window` 或 `document` 时，结果为 `child.getBoundingClientRect().top + pageYOffset/scrollY`。
+> - 当 `container` 为元素时，结果为 `childRect.top - containerRect.top + container.scrollTop`。
+> - 仅计算**垂直方向**（`top`）；如需横向，请实现对应的 `getScrollLeftForChild`。
+> - 若 `child` 非 `container` 的后代，计算结果不具语义保证。
+
+---
+
 ## 📌 数组处理 (`flatten`)
 
 ### 🔸 flatten
@@ -487,6 +571,35 @@ const copy = omit(original, ['a']);
 console.log(original); 
 // => { a: 1, b: 2, c: 3 }
 ```
+
+---
+
+### 🔸 depsAreSame
+
+> **说明**：对比两组依赖数组是否“浅层等值”。逐项使用 `!==` 比较（**非** `Object.is`），长度不同或任一项不相等则返回 `false`。
+
+#### **函数签名：**
+
+```
+function depsAreSame(oldDeps: DependencyList, deps: DependencyList): boolean;
+```
+
+#### **参数说明：**
+
+| 参数名    | 类型             | 说明           |
+| --------- | ---------------- | -------------- |
+| `oldDeps` | `DependencyList` | 旧的依赖项数组 |
+| `deps`    | `DependencyList` | 新的依赖项数组 |
+
+#### **返回值：**
+
+- `boolean`：两数组长度一致且每一项都通过 `===` 判断为相等则返回 `true`，否则返回 `false`。
+
+> 注意差异：该实现与 React 内部使用的 `Object.is` 略有不同——
+>
+> - `NaN`：此处会判为**不相等**（返回 `false`）；`Object.is(NaN, NaN)` 为 `true`。
+> - `0` 与 `-0`：此处判为**相等**；`Object.is(0, -0)` 为 `false`。
+>    如需与 React 依赖比较完全一致，请改用 `Object.is`。
 
 ---
 
@@ -707,7 +820,7 @@ class TemplateBuilder {
 - 原字符串拼接处可逐步替换为 `interpolate` 或 `TemplateBuilder`，先小范围试点再覆盖全局。
 - 对外显示/日志类内容建议加上统一 `transform`（如 `escapeHTML`）以防注入/乱码。
 
----
+
 
 ## 🔗 其他文档索引
 

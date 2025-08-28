@@ -77,6 +77,255 @@ export default Counter;
 
 ---
 
+## 🔹 `useEffectWithTarget`
+
+`useEffectWithTarget` 是一个将副作用 **绑定到特定目标元素**（或多个目标）的 Hook。它的行为与 `useEffect` 类似，但会在 **依赖变化** 或 **目标元素变化** 时执行清理并重新执行 effect，非常适合对 DOM 事件进行挂载/解绑、对动态容器做监听。
+
+### 🌟 主要作用
+
+- ✅ **目标绑定**：把副作用绑定到 `Element / Document / Window` 等目标；
+- 🔄 **自动重绑**：当依赖或目标引用变化时，自动清理并重新执行；
+- 🧩 **支持多个目标**：可同时对多个元素做副作用处理；
+- 🧯 **健壮性**：避免遗漏清理导致的重复绑定与内存泄漏。
+
+------
+
+### 📦 API
+
+```ts
+function useEffectWithTarget(
+  effect: EffectCallback,
+  deps: DependencyList,
+  target: BasicTarget<any> | BasicTarget<any>[]
+): void;
+```
+
+> `BasicTarget<T>` 允许三种形式：
+>
+> - 直接的目标：`Element | Document | Window`
+> - `RefObject<T | null>`
+> - 返回上述对象的函数：`() => T | null | undefined`
+
+------
+
+### 📖 参数说明
+
+| 参数   | 类型                          | 说明                             |
+| ------ | ----------------------------- | -------------------------------- |
+| effect | `EffectCallback`              | 副作用函数，返回清理函数（可选） |
+| deps   | `DependencyList`              | 依赖项数组，变化时会触发重绑     |
+| target | `BasicTarget | BasicTarget[]` | 目标元素/对象，支持单个或多个    |
+
+------
+
+### ✨ 使用示例
+
+#### 🌰 监听滚动（单目标）
+
+```tsx
+import React, { useRef } from 'react';
+import { useEffectWithTarget } from '@gpx/common-funcraft';
+
+export default function Example() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffectWithTarget(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const onScroll = () => {
+      // 处理滚动
+    };
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [], scrollRef);
+
+  return <div ref={scrollRef} style={{ height: 200, overflow: 'auto' }} />;
+}
+```
+
+#### 🌰 同时监听多个目标
+
+```tsx
+useEffectWithTarget(() => {
+  const onResize = () => { /* ... */ };
+  const onScroll = () => { /* ... */ };
+
+  window.addEventListener('resize', onResize);
+  document.addEventListener('scroll', onScroll, { passive: true });
+
+  return () => {
+    window.removeEventListener('resize', onResize);
+    document.removeEventListener('scroll', onScroll);
+  };
+}, [], [window, document]);
+```
+
+------
+
+### 💡 场景说明 & 小贴士
+
+- `ref.current` 改变**也会**触发重新执行（因为 hook 内部实际上每一次 `rerender` 都会比较 `ref.current` 的变化）；
+- 适合对动态容器做事件监听、尺寸监听等副作用操作；
+- 对滚动事件请加 `{ passive: true }`，避免主线程阻塞。
+- 清理函数在 **依赖变化** 与 **组件卸载** 时都会执行，确保事件不会重复挂载。
+
+------
+
+## 🚧 `useScroll`（实验性）
+
+`useScroll` 用于**监听**指定容器的滚动位置，并提供**控制滚动**的一组方法。支持 `Element / Document / Window`，以及**同源** `iframe`（跨域将打印告警并跳过绑定）。
+
+> ⚠️ 实验性说明：当前实现“可用但仍在打磨”。在某些场景（如初始化阶段）可能出现**一帧内多次回调**的情况；横向滚动 API 尚未实现，仅会打印告警。
+
+### 🌟 主要作用
+
+- 🧭 **获取滚动状态**：`position`、`isTop/isBottom/isLeft/isRight`；
+- 🧰 **控制滚动**：`scrollTo / scrollToTop / scrollToBottom / ...`；
+- 🧬 **回调通知**：`onScroll(position, size)` 获取最新位置与容器尺寸；
+- 🧩 **多类目标**：Window / Document / 普通元素 / 同源 iframe。
+
+------
+
+### 📦 API
+
+```ts
+export interface IUseScrollOptions extends Pick<ScrollToOptions, 'duration'> {
+  shouldUpdate?: (pos: { left: number; top: number }) => boolean;
+  onScroll?: (position: Position, size: DomSize | null) => void;
+  deps?: DependencyList; // 目标可能替换时传入，用于触发重绑
+}
+
+export interface IUseScrollReturn {
+  position: { left: number; top: number };
+  isTop: boolean;
+  isBottom: boolean;
+  isLeft: boolean;
+  isRight: boolean;
+
+  scrollTo: (position: Partial<Position> | BasicTarget) => void;
+  scrollToTop: () => void;
+  scrollToBottom: () => void;
+
+  // 实验期：尚未实现
+  scrollToLeft: () => void;   // 将打印告警
+  scrollToRight: () => void;  // 将打印告警
+}
+
+function useScroll(target: BasicTarget<Element | Document | Window>, options?: IUseScrollOptions): IUseScrollReturn;
+```
+
+------
+
+### 📖 参数说明
+
+| 参数                 | 类型                                       | 说明                                         |
+| -------------------- | ------------------------------------------ | -------------------------------------------- |
+| target               | `BasicTarget<Element | Document | Window>` | 目标容器；也可传 `ref` 或返回目标的函数      |
+| options.duration     | `number`                                   | 滚动动画时长（ms），默认 `450`               |
+| options.shouldUpdate | `(pos) => boolean`                         | 返回 `false` 可阻止本次更新（可做阈值/节流） |
+| options.onScroll     | `(position, size) => void`                 | 滚动/尺寸变更时回调（当前实现可能一帧多次）  |
+| options.deps         | `DependencyList`                           | 目标会替换时传入标识触发重绑                 |
+
+------
+
+### 📦 返回值说明
+
+| 字段             | 类型            | 说明                                                  |
+| ---------------- | --------------- | ----------------------------------------------------- |
+| position         | `{ left; top }` | 当前滚动位置                                          |
+| isTop / isBottom | `boolean`       | 垂直边界（含 1px 容差）                               |
+| isLeft / isRight | `boolean`       | 水平边界（含 1px 容差）                               |
+| scrollTo*        | `function`      | 控制滚动的方法；`scrollTo` 也可传子元素，自动计算偏移 |
+
+------
+
+### ✨ 使用示例
+
+#### 🌰 监听元素并滚动控制
+
+```tsx
+import React, { useRef } from 'react';
+import { useScroll } from '@gpx/common-funcraft';
+
+export default function List() {
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const { position, isBottom, scrollToTop, scrollToBottom, scrollTo } = useScroll(listRef, 	 {
+    duration: 300,
+    onScroll: (pos, size) => {
+      // 每次滚动或尺寸变化都会回调（实验期：初始化可能回调多次）
+      // console.log(pos, size);
+    },
+    // 仅当垂直位移变化 >= 2px 时才更新
+    shouldUpdate: (p) => Math.abs(p.top - (position.top ?? 0)) >= 2,
+  });
+
+  return (
+    <>
+      <div ref={listRef} style={{ height: 240, overflow: 'auto' }}>
+        {/* ... 很长的内容 ... */}
+      </div>
+
+      <button onClick={scrollToTop}>回到顶部</button>
+      <button onClick={scrollToBottom} disabled={isBottom}>滚动到底</button>
+      {/* 滚到某个子元素（必须是当前容器的后代） */}
+      <button onClick={() => scrollTo(() => document.getElementById('row-50'))}>
+        滚到第 50 行
+      </button>
+    </>
+  );
+}
+```
+
+#### 🌰 监听页面（Window/Document）
+
+```tsx
+function Page() {
+  const { position, isTop, scrollToTop, scrollToBottom, scrollTo } = useScroll(document, {
+    onScroll: (pos) => { /* ... */ },
+  });
+
+  return (
+    <>
+      <p>Y: {position.top}</p>
+      <button disabled={isTop} onClick={scrollToTop}>回到页面顶部</button>
+      <button onClick={scrollToBottom}>滚到页面底部</button>
+      <button onClick={() => scrollTo(() => document.getElementById('section-3')!)}>
+        滚到 Section 3
+      </button>
+    </>
+  );
+}
+```
+
+#### 🌰 目标可能替换：用 `deps` 触发重绑
+
+```tsx
+const [activeTab, setActiveTab] = useState<'A' | 'B'>('A');
+const aRef = useRef<HTMLDivElement>(null);
+const bRef = useRef<HTMLDivElement>(null);
+
+// activeTab 变化导致滚动容器变化，借助 deps 触发重绑
+useScroll(() => (activeTab === 'A' ? aRef.current : bRef.current), {
+  deps: [activeTab],
+  onScroll: (pos) => { /* ... */ },
+});
+```
+
+------
+
+### ⚠️ 注意事项（实验性特性）
+
+- **同源 `iframe`**：可正常监听 `contentWindow`；**跨域**将打印告警并跳过绑定。
+- **初始化回调次数**：当前实现中，初始化阶段可能触发 **≥1 次** `onScroll`（`position` 与 `size` 各自更新各触发一次）。未来可能改为**单帧合并一次**。
+- **水平滚动**：`scrollToLeft/Right` 尚未实现，仅打印告警。
+- **边界判断**：`isBottom/isRight` 带 **1px 容差**，以减少缩放/浮点误差。
+- **目标变更**：仅修改 `ref.current` 不会触发重绑；若容器会替换，请在 `options.deps` 传入标识（或更换 ref 对象）。
+- **事件目标**：`document/window` 的滚动与尺寸监听绑定在 **`window`**；元素尺寸优先通过 `ResizeObserver` 监听，旧环境降级为 `window.resize`。
+- **SSR**：在非浏览器环境下请跳过调用或做能力判断。
+
 ## 🚧 注意事项
 
 - 本 Hook 依赖于 React 16.9 及以上版本。
