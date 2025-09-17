@@ -1,3 +1,7 @@
+/**
+ * @deprecated 以下类型声明定义已迁移至 [`@gpx/ca-core`](http://192.168.8.48/yangjunhao/ca-core) 包中，本地声明仅作兼容性支持，后续版本将移除
+ */
+
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 export interface ResponseData<T> {

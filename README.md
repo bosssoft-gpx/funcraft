@@ -58,11 +58,11 @@ yarn add @gpx/common-funcraft
 
 ## 📌 反馈与贡献
 
-如果你有任何问题、建议或想参与贡献，欢迎提交 [Issue](https://github.com/your-repo/issues)
+如果你有任何问题、建议或想参与贡献，欢迎提交 [Issue](https://github.com/bosssoft-gpx/funcraft/issues)
 或 [Pull Request](https://github.com/your-repo/pulls)。
 
 ## 📦 相关链接
 
 - [NPM 仓库](https://www.npmjs.com/package/@gpx/common-funcraft)
-- [项目仓库](https://github.com/your-repo)
+- [项目仓库](https://github.com/bosssoft-gpx/funcraft)
 - [更新日志（CHANGELOG）](docs/CHANGELOG.md)
