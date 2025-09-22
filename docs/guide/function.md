@@ -572,6 +572,39 @@ console.log(original);
 // => { a: 1, b: 2, c: 3 }
 ```
 
+### 🔸safeErrorWrapper
+> **说明**：将任意类型的错误包装成 Error 对象，确保一致的错误处理体验。适用于捕获未知异常并统一处理的场景。
+
+**示例：**
+
+```ts
+import { safeErrorWrapper } from "@gpx/common-funcraft";
+
+// 传入 Error 实例，返回原始 Error
+const err1 = safeErrorWrapper(new Error("Something went wrong"));
+// => Error("Something went wrong")
+
+// 传入字符串，包装为 Error
+const err2 = safeErrorWrapper("A string error");
+// => Error("A string error")
+
+// 传入包含 message 字段的对象，提取 message
+const err3 = safeErrorWrapper({ message: "An object error" });
+// => Error("An object error")
+
+// 传入数字，使用默认错误信息
+const err4 = safeErrorWrapper(42);
+// => Error("Unknown error")
+
+// 传入 null，使用默认错误信息
+const err5 = safeErrorWrapper(null);
+// => Error("Unknown error")
+
+// 传入无法识别的类型并指定 fallback，返回自定义错误信息
+const err6 = safeErrorWrapper(undefined, "自定义错误信息");
+// => Error("自定义错误信息")
+```
+
 ---
 
 ### 🔸 depsAreSame

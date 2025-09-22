@@ -37,3 +37,36 @@ export const omit = <T extends object, K extends keyof T>(
 
 	return clone;
 };
+
+/**
+ * 将任意类型的错误包装成 Error 对象
+ *
+ * @param error 任意类型的错误
+ * @param fallback (可选) 如果无法从 error 中提取信息，则使用该字符串作为错误信息
+ *
+ * @return 返回一个 Error 对象
+ *
+ * @example
+ * ```ts
+ * const err1 = safeErrorWrapper(new Error("Something went wrong"));
+ * // err1 is Error("Something went wrong")
+ * const err2 = safeErrorWrapper("A string error");
+ * // err2 is Error("A string error")
+ * const err3 = safeErrorWrapper({ message: "An object error" });
+ * // err3 is Error("An object error")
+ * const err4 = safeErrorWrapper(42, "Fallback error message");
+ * // err4 is Error("Fallback error message")
+ * const err5 = safeErrorWrapper(null);
+ * // err5 is Error("Unknown error")
+ * ```
+ */
+export const safeErrorWrapper = (error: any, fallback?: string) => {
+	if (error instanceof Error) {
+		return error;
+	} else if (typeof error === 'string') {
+		return new Error(error);
+	} else if (error && typeof error === 'object' &&'message' in error && typeof error.message === 'string') {
+		return new Error(error.message);
+	}
+	return new Error(fallback || 'Unknown error');
+};
