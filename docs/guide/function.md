@@ -223,6 +223,17 @@ isEmpty([1, 2, 3]);         // false
 isEmpty({ key: "value" });  // false
 ```
 
+### 🔸 isPostalCode
+
+> **说明**：判断是否是有效的中国大陆邮政编码。
+
+```ts
+import { isPostalCode } from "@gpx/common-funcraft";
+
+isPostalCode("310000"); // true
+isPostalCode("12345");  // false
+```
+
 ---
 
 ## 🌐 视图 & 滚动处理 (`view`)

@@ -58,6 +58,25 @@ export const isPhone = (value: string): boolean => {
     return phoneReg.test(value);
 };
 
+/**
+ * 判断传入的值是否为邮政编码
+ *
+ * 使用正则表达式检测传入字符串是否符合中国大陆常用的邮政编码格式（6 位数字，且首位不为0）。
+ *
+ * @param value 需要判断的值。
+ * @returns 如果是邮政编码，则返回 `true`，否则返回 `false`。
+ *
+ * @example
+ * ```ts
+ * const result = isPostalCode("100000"); // 返回 true
+ * const result2 = isPostalCode("012345"); // 返回 false
+ * ```
+ */
+export const isPostalCode = (value: string): boolean => {
+    if (typeof value !== 'string') return false;
+    const postalCodeReg = /^[1-9]\d{5}$/;
+    return postalCodeReg.test(value);
+};
 
 /**
  * 判断传入的值是否为空。
