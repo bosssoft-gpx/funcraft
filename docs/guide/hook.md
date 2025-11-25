@@ -75,6 +75,11 @@ export default Counter;
 - `countRef` 用于始终访问最新状态，而不引起回调函数重新创建；
 - `useCallback` 中直接使用 `countRef.current` 获取状态最新值，避免了过多的依赖更新。
 
+#### 🚧 注意事项
+
+- 本 Hook 依赖于 React 16.9 及以上版本。
+- 请避免直接修改 ref 的值，状态更新请使用 `setState` 方法。
+
 ---
 
 ## 🔹 `useEffectWithTarget`
@@ -314,6 +319,16 @@ useScroll(() => (activeTab === 'A' ? aRef.current : bRef.current), {
 });
 ```
 
+### ⚠️ 注意事项（实验性特性）
+
+- **同源 `iframe`**：可正常监听 `contentWindow`；**跨域**将打印告警并跳过绑定。
+- **初始化回调次数**：当前实现中，初始化阶段可能触发 **≥1 次** `onScroll`（`position` 与 `size` 各自更新各触发一次）。未来可能改为**单帧合并一次**。
+- **水平滚动**：`scrollToLeft/Right` 尚未实现，仅打印告警。
+- **边界判断**：`isBottom/isRight` 带 **1px 容差**，以减少缩放/浮点误差。
+- **目标变更**：仅修改 `ref.current` 不会触发重绑；若容器会替换，请在 `options.deps` 传入标识（或更换 ref 对象）。
+- **事件目标**：`document/window` 的滚动与尺寸监听绑定在 **`window`**；元素尺寸优先通过 `ResizeObserver` 监听，旧环境降级为 `window.resize`。
+- **SSR**：在非浏览器环境下请跳过调用或做能力判断。
+
 ------
 
 ## 🔹 `useReactiveRef`
@@ -377,23 +392,61 @@ export default Example;
 - 组件状态更新不会触发 `setInterval` 回调的重新创建。
 
 ------
+## 🔹 `useEvent`
 
-### ⚠️ 注意事项（实验性特性）
+`useEvent` 创建一个稳定的事件处理函数引用，确保在组件重新渲染时不会改变引用，同时始终调用最新的回调函数。适合在需要传递事件处理函数给子组件或第三方库时使用。
 
-- **同源 `iframe`**：可正常监听 `contentWindow`；**跨域**将打印告警并跳过绑定。
-- **初始化回调次数**：当前实现中，初始化阶段可能触发 **≥1 次** `onScroll`（`position` 与 `size` 各自更新各触发一次）。未来可能改为**单帧合并一次**。
-- **水平滚动**：`scrollToLeft/Right` 尚未实现，仅打印告警。
-- **边界判断**：`isBottom/isRight` 带 **1px 容差**，以减少缩放/浮点误差。
-- **目标变更**：仅修改 `ref.current` 不会触发重绑；若容器会替换，请在 `options.deps` 传入标识（或更换 ref 对象）。
-- **事件目标**：`document/window` 的滚动与尺寸监听绑定在 **`window`**；元素尺寸优先通过 `ResizeObserver` 监听，旧环境降级为 `window.resize`。
-- **SSR**：在非浏览器环境下请跳过调用或做能力判断。
+### 🌟 主要作用
+- ✅ **稳定引用**：创建一个稳定的事件处理函数引用，避免因组件重新渲染导致引用变化；
+- 🔥 **最新回调**：确保事件处理函数始终调用最新的回调函数；
+- 🎯 **简化代码**：避免在 `useCallback` 中手动管理依赖数组。
 
-## 🚧 注意事项
+### 📦 API
 
-- 本 Hook 依赖于 React 16.9 及以上版本。
-- 请避免直接修改 ref 的值，状态更新请使用 `setState` 方法。
+```typescript
+declare const useEvent: <T extends (...args: any[]) => any>(handler?: T) => T;
+```
 
----
+### 📖 参数说明
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| handler | `T` | 事件处理函数，可以是任意函数类型 |
+
+### 📦 返回值说明
+| 返回值 | 类型 | 说明 |
+|--------|------|------|
+| eventHandler | `T` | 稳定的事件处理函数引用，始终调用最新的回调函数 |
+
+### ✨ 使用示例
+#### 🌰 示例代码
+```tsx
+import React, { useState } from 'react';
+import { useEvent } from '@gpx/common-funcraft';
+
+function Example() {
+    const [count, setCount] = useState(0);
+
+    const handleClick = useEvent(() => {
+        setCount(prevCount => prevCount + 1);
+    });
+
+    return (
+        <div>
+            <p>Count: {count}</p>
+            <button onClick={handleClick}>Increment</button>
+        </div>
+    );
+}
+export default Example;
+```
+
+#### 🌟 场景说明
+上述示例中：
+- `handleClick` 是一个稳定的事件处理函数引用；
+- 每次点击按钮时，都会调用最新的回调函数，正确更新 `count` 状态；
+- 组件重新渲染不会导致 `handleClick` 引用变化。
+
+------
 
 ## 🔗 其他文档索引
 

@@ -299,8 +299,8 @@ scrollTo(500, {
 
 > **说明**：获取指定元素祖先链中的最大 `z-index` 值。
 
-```
-ts复制编辑import { getMaxZIndex } from "@gpx/common-funcraft";
+```ts
+import { getMaxZIndex } from "@gpx/common-funcraft";
 
 const panel = document.getElementById("progress-panel");
 const maxZ = getMaxZIndex(panel); // 比如：返回 10002
