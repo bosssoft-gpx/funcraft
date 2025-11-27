@@ -448,6 +448,330 @@ export default Example;
 
 ------
 
+## 🔹 `useSafeState`
+
+`useSafeState` 是一个带「卸载安全保护」的 `useState` 替代方案。
+ 它在保持原生 API 体验的基础上，为 `setState` 额外提供了一个可选参数，用于在组件卸载后安全忽略某些状态更新，避免控制台充斥 `setState on unmounted component` 警告。
+
+### 🌟 主要作用
+
+- ✅ **避免卸载后更新状态的警告**：在组件已卸载的情况下，可以选择性跳过本次 `setState`；
+- 🔄 **更安全的异步状态更新**：适用于定时器、请求回调、事件监听等不受 React 生命周期控制的异步逻辑；
+- 🎯 **显式控制，而非全局静默吞掉**：只有在你明确传入 `ignoreDestroy` 时才会忽略更新，不会偷偷掩盖真实问题。
+
+### 📦 API
+
+```
+declare function useSafeState<S>(
+  initialState: S | (() => S)
+): [S, (value: React.SetStateAction<S>, ignoreDestroy?: boolean) => void];
+```
+
+### 📖 参数说明
+
+#### `initialState`
+
+| 参数名         | 类型          | 说明                                                         |
+| -------------- | ------------- | ------------------------------------------------------------ |
+| `initialState` | `S | () => S` | 初始状态值。与原生 `useState` 一致，支持直接传值或惰性初始化函数。 |
+
+### 📦 返回值说明
+
+| 返回值     | 类型                                                         | 说明                                                         |
+| ---------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| `state`    | `S`                                                          | 当前状态值。                                                 |
+| `setState` | `(value: SetStateAction<S>, ignoreDestroy?: boolean) => void` | 状态更新函数。第一个参数同 `useState`，第二个可选参数用于控制卸载安全行为：<br/>- 不传或为 `false`：行为与原生 `setState` 一致；<br/>- 为 `true` 且组件已卸载：本次更新会被安全忽略。 |
+
+------
+
+### ✨ 使用示例
+
+#### 1️⃣ 异步请求中避免卸载后 `setState`
+
+```tsx
+import React, { useEffect } from 'react';
+import { useSafeState } from '@gpx/common-funcraft';
+
+function AsyncExample() {
+    const [data, setData] = useSafeState<string | null>(null);
+    const [loading, setLoading] = useSafeState(false);
+
+    useEffect(() => {
+        setLoading(true);
+
+        const controller = new AbortController();
+
+        fetch('/api/data', { signal: controller.signal })
+            .then(res => res.text())
+            .then(text => {
+                // 第二个参数传 true：
+                // 如果组件此时已经卸载，本次更新会被安全忽略
+                setData(text, true);
+            })
+            .catch(() => {
+                // 这里视情况决定是否忽略卸载后的更新
+                setData(null, true);
+            })
+            .finally(() => {
+                setLoading(false, true);
+            });
+
+        return () => {
+            controller.abort();
+        };
+    }, []);
+
+    if (loading) return <div>加载中...</div>;
+    return <div>数据：{data ?? '暂无'}</div>;
+}
+
+export default AsyncExample;
+```
+
+##### 🌟 场景说明
+
+- 请求返回的时间不受 React 控制，完全可能在组件卸载后才完成；
+- 使用 `setData(next, true)` / `setLoading(next, true)`：
+  - 若组件仍挂载 → 正常更新；
+  - 若组件已卸载 → 本次更新被忽略，不会触发 React 警告；
+- 你可以明确区分哪些异步更新“即使丢掉也没问题”，而不是全局静默吞掉所有卸载后的更新。
+
+------
+
+#### 2️⃣ 普通场景下直接当作 `useState` 使用
+
+```tsx
+import React from 'react';
+import { useSafeState } from '@gpx/common-funcraft';
+
+function Counter() {
+    const [count, setCount] = useSafeState(0);
+
+    const handleIncrement = () => {
+        // 不传 ignoreDestroy，行为与原生 useState 完全一致
+        setCount(prev => prev + 1);
+    };
+
+    return (
+        <div>
+            <p>Count: {count}</p>
+            <button onClick={handleIncrement}>增加</button>
+        </div>
+    );
+}
+
+export default Counter;
+```
+
+##### 🌟 场景说明
+
+- 在绝大多数普通同步/简单场景中，你可以完全把 `useSafeState` 当作 `useState` 使用；
+- 只有在“**异步 + 可能在卸载后才触发**”的更新中，才需要考虑传入 `ignoreDestroy`。
+
+------
+
+#### 3️⃣ 搭配事件监听/定时器的使用场景
+
+```tsx
+import React, { useEffect } from 'react';
+import { useSafeState } from '@gpx/common-funcraft';
+
+function Timer() {
+    const [tick, setTick] = useSafeState(0);
+
+    useEffect(() => {
+        const id = window.setInterval(() => {
+            // 周期性回调，可能在组件卸载后仍触发：
+            // 传入 ignoreDestroy = true，避免卸载后继续 setState
+            setTick(prev => prev + 1, true);
+        }, 1000);
+
+        return () => {
+            window.clearInterval(id);
+        };
+    }, []);
+
+    return <div>Tick: {tick}</div>;
+}
+
+export default Timer;
+```
+
+##### 🌟 场景说明
+
+- `setInterval` 是典型的“生命周期之外”的异步源；
+- 使用 `useSafeState` 并在回调里传入 `ignoreDestroy = true`，即使定时器清理不及时，也不会在卸载后打警告；
+- 更适合通用组件内部、复杂交互中统一兜底处理。
+
+---
+
+## 🔹 `useMergedState`
+
+`useMergedState` 用于统一管理「受控值」与「非受控值」，封装了组件中常见的 `value` / `defaultValue` / 内部状态三者的合并逻辑。
+ 非常适合封装通用组件时处理双模式（受控 / 非受控）状态。
+
+### 🌟 主要作用
+
+- ✅ **统一受控 / 非受控逻辑**：支持 `value`、`defaultValue` 和内部状态的优先级合并；
+- 🔄 **对齐组件使用习惯**：对外暴露的行为与常见 UI 组件库一致（如输入框、选择器等）；
+- 📣 **状态变更通知**：通过 `onChange` 统一向外透出值变化，携带当前值与前一次值；
+- 🎯 **派生视图值**：支持通过 `postState` 在对外暴露前对合并结果做映射（格式化、兜底等）。
+
+### 📦 API
+
+```tsx
+declare function useMergedState<T, R = T>(
+  defaultStateValue: T | (() => T),
+  options?: {
+    defaultValue?: T | (() => T);
+    value?: T;
+    onChange?: (value: T, prevValue: T) => void;
+    postState?: (value: T) => R;
+  }
+): [R, React.Dispatch<React.SetStateAction<T>>];
+```
+
+### 📖 参数说明
+
+#### `defaultStateValue`
+
+| 参数名              | 类型          | 说明                                                         |
+| ------------------- | ------------- | ------------------------------------------------------------ |
+| `defaultStateValue` | `T | () => T` | 内部状态兜底初始值。仅当未提供 `options.value` 和 `options.defaultValue` 时使用。支持直接传值或惰性初始化函数。 |
+
+#### `options`
+
+| 字段名         | 类型                          | 说明                                                         |
+| -------------- | ----------------------------- | ------------------------------------------------------------ |
+| `defaultValue` | `T | () => T`                 | 非受控模式下的默认值，优先级高于 `defaultStateValue`。支持直接传值或惰性初始化函数。 |
+| `value`        | `T`                           | 受控值。**只要该值不是 `undefined`，Hook 就处于受控模式，对外值以此为准。** |
+| `onChange`     | `(value: T, prev: T) => void` | 状态变化回调。在内部值变化后触发，传入当前值和上一次值。     |
+| `postState`    | `(value: T) => R`             | 对合并后的原始值做一次映射，仅影响对外暴露的返回值，不改变内部实际存储的值。 |
+
+### 📦 返回值说明
+
+| 返回值           | 类型                                      | 说明                                                         |
+| ---------------- | ----------------------------------------- | ------------------------------------------------------------ |
+| `mergedValue`    | `R`                                       | 对外暴露的当前值。受控模式下来自 `options.value`，非受控模式下来自内部状态，并可经过 `postState` 映射。 |
+| `setMergedValue` | `React.Dispatch<React.SetStateAction<T>>` | 更新内部原始值的 `setState` 函数，签名与原生 `useState` 一致。 |
+
+------
+
+### ✨ 使用示例
+
+#### 1️⃣ 非受控用法：支持 `defaultValue`
+
+```tsx
+import React from 'react';
+import { useMergedState } from '@gpx/common-funcraft';
+
+function UncontrolledInput() {
+    const [value, setValue] = useMergedState<string>('', {
+        defaultValue: '初始文本',
+    });
+
+    return (
+        <div>
+            <p>当前值：{value}</p>
+            <input
+                value={value}
+                onChange={e => setValue(e.target.value)}
+            />
+        </div>
+    );
+}
+
+export default UncontrolledInput;
+```
+
+**场景说明：**
+
+- 未传入 `value`，Hook 处于**非受控模式**；
+- 初始值来自 `defaultValue: "初始文本"`；
+- 组件内部通过 `setValue` 自行管理状态。
+
+------
+
+#### 2️⃣ 受控用法：统一 `value` / `onChange` 处理
+
+```tsx
+import React from 'react';
+import { useMergedState } from '@gpx/common-funcraft';
+
+interface InputProps {
+    value?: string;
+    defaultValue?: string;
+    onChange?: (next: string) => void;
+}
+
+const MyInput: React.FC<InputProps> = props => {
+    const [value, setValue] = useMergedState<string>('', {
+        value: props.value,
+        defaultValue: props.defaultValue,
+        onChange: (next) => props.onChange?.(next),
+    });
+
+    return (
+        <input
+            value={value}
+            onChange={e => setValue(e.target.value)}
+        />
+    );
+};
+
+export default MyInput;
+```
+
+**场景说明：**
+
+- 当父组件传入 `value` 时：`MyInput` 进入**受控模式**，显示由外部 `value` 决定；
+- 当父组件不传 `value` 时：`MyInput` 进入**非受控模式**，内部使用 `defaultValue`/`defaultStateValue` 初始化；
+- 内部统一通过 `setValue` 更新，`useMergedState` 帮你处理模式切换和 `onChange` 回调。
+
+------
+
+#### 3️⃣ 使用 `postState` 做值映射（例如 Date → 时间戳）
+
+```tsx
+import React from 'react';
+import { useMergedState } from '@gpx/common-funcraft';
+
+interface DatePickerProps {
+    value?: Date | null;
+    onChange?: (next: Date | null) => void;
+}
+
+const TimestampDisplay: React.FC<DatePickerProps> = props => {
+    const [timestamp, setDate] = useMergedState<Date | null, number | null>(null, {
+        value: props.value,
+        onChange: (nextDate, prevDate) => {
+            console.log('Date changed:', prevDate, '->', nextDate);
+            props.onChange?.(nextDate);
+        },
+        postState: date => (date ? date.getTime() : null),
+    });
+
+    return (
+        <div>
+            <button onClick={() => setDate(new Date())}>
+                设置为当前时间
+            </button>
+            <p>当前时间戳：{timestamp ?? '未选择'}</p>
+        </div>
+    );
+};
+
+export default TimestampDisplay;
+```
+
+**场景说明：**
+
+- 内部原始值类型是 `Date | null`；
+- 通过 `postState` 将合并后的值映射为 `number | null` 的时间戳，对视图层更友好；
+- `setDate` / `onChange` 始终处理的是 `Date`，视图拿到的是转换后的 `timestamp`。
+
+---
+
 ## 🔗 其他文档索引
 
 - 🛠️ [工具函数使用指南](function.md)

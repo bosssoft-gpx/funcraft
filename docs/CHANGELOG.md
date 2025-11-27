@@ -4,6 +4,35 @@
 
 ---
 
+## [0.2.4] - 2025-11-27
+
+### ✨ 新增
+
+- **Hook: `useMergedState`**
+  - 统一管理「受控 / 非受控」两种状态模式；
+  - 支持 `value` / `defaultValue` / 内部状态三者的合并逻辑；
+  - 提供 `onChange` 回调，携带当前值与前一个值；
+  - 支持 `postState` 对合并后的值进行映射（用于格式化 / 派生视图值）；
+  - 与社区主流 UI 组件库的受控逻辑保持一致，适合构建通用组件。
+- **Hook: `useSafeState`**
+  - `useState` 的安全版本；
+  - 支持在 `setState` 中显式传入 `ignoreDestroy` 参数，以避免组件卸载后仍触发状态更新；
+  - 适用于异步回调、防抖节流、定时器、事件监听等生命周期之外的更新行为；
+  - 有效消除控制台中常见的 “Can't perform a React state update on an unmounted component” 警告。
+
+### 📝 文档
+
+- 新增 **`useMergedState`** 使用文档：API、受控/非受控示例、`postState` 派生示例、注意事项。
+- 新增 **`useSafeState`** 使用文档：API、异步请求示例、定时器示例、注意事项说明。
+- 示例文档遵循 Funcraft 风格，统一展示 API 表格、场景说明、完整代码示例。
+
+### ⚠️ 注意
+
+- `useSafeState` 的 `ignoreDestroy` 参数不会默认忽略卸载后的更新，开发者需要明确确认该更新可安全跳过，以避免业务逻辑被静默吞掉。
+- `useMergedState` 的 `postState` 仅对对外暴露值做映射，不会影响内部真实状态；对于需双向转换的场景，应自行实现对应的 setter 映射逻辑。
+
+------
+
 ## [0.2.3] - 2025-11-25
 
 ### ✨ 新增
