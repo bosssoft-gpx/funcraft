@@ -4,6 +4,29 @@
 
 ---
 
+## [0.3.0] - 2026-03-19
+
+### ✨ 新增
+
+- 新增 **package knowledge pack** 资产：
+  - `package.manifest.json`
+  - `docs/package/*`（overview / architecture / exports / constraints / glossary）
+  - `docs/recipes/*`（入口选择与旧版 webpack Vue 安全导入）
+  - `docs/examples/index.md`
+
+### 📝 文档
+
+- `README.md` 增加 package 入口 front-matter 与分层导航。
+- 明确“多导出入口”的设计原因：兼容旧版 webpack Vue 项目，避免全量导入时误打包 React Hook 能力。
+- 增加入口选型、约束与反模式说明，提升跨运行时接入一致性。
+
+### ⚠️ 变更与声明
+
+- **SCSS 资产已标记为 Deprecated（兼容保留）**：仅用于旧版本项目过渡，不再建议新项目新增依赖。
+- 新增导出重构 TODO：后续将按 `common/`、`vue/`、`react/` 三类目录拆分构建产物，并补充迁移映射文档。
+
+------
+
 ## [0.2.4] - 2025-11-27
 
 ### ✨ 新增
@@ -204,4 +227,3 @@
 遵循纯函数设计，原对象不会被修改；
 
 已提供完整的文档与 Vitest 测试用例。
-

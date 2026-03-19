@@ -1,0 +1,251 @@
+{
+  "name": "@gpx/common-funcraft",
+  "version": "0.3.0",
+  "knowledge_pack_version": "1.0.0",
+  "archetype": "utility",
+  "public_mission": "为前端项目提供可复用的通用函数、React Hook 与兼容性工具，同时明确不同运行时和框架的入口选择边界。",
+  "non_goals": [
+    "不作为完整 UI 组件库或设计系统载体",
+    "不再作为新项目的主样式方案承载方（SCSS 仅兼容保留）"
+  ],
+  "deprecations": [
+    {
+      "domain": "scss-assets",
+      "status": "deprecated-compat-only",
+      "reason": "项目已采用新的样式管理方案，SCSS 仅为旧版本兼容保留。",
+      "policy": "仅做兼容维护，不推荐新增依赖。"
+    }
+  ],
+  "entrypoints": [
+    {
+      "specifier": "@gpx/common-funcraft",
+      "status": "stable",
+      "contains": [
+        "utils",
+        "react-hooks"
+      ],
+      "recommended_for": [
+        "React 项目",
+        "支持 Tree-shaking 的构建环境"
+      ],
+      "avoid_when": [
+        "旧版 webpack Vue 项目（全量导入可能引入 React Hook 相关代码）"
+      ],
+      "selection_rule": "当环境明确支持按需导入且需要 Hook + utils 一体消费时使用。"
+    },
+    {
+      "specifier": "@gpx/common-funcraft/es/utils",
+      "status": "stable",
+      "contains": [
+        "utils-only"
+      ],
+      "recommended_for": [
+        "Vue 项目",
+        "非 React 项目",
+        "旧版 webpack 项目"
+      ],
+      "selection_rule": "当只需要通用函数且希望避免 React Hook 打包影响时优先使用。"
+    },
+    {
+      "specifier": "@gpx/common-funcraft/es/styles/variables",
+      "status": "deprecated-compat-only",
+      "contains": [
+        "scss-variables"
+      ],
+      "recommended_for": [
+        "旧版本样式迁移期项目"
+      ],
+      "selection_rule": "仅兼容场景使用，新项目不推荐。"
+    }
+  ],
+  "module_families": [
+    {
+      "name": "utils",
+      "description": "通用工具函数集合（number/validation/view/object/templateBuilder 等）。",
+      "primary_entrypoint": "@gpx/common-funcraft/es/utils"
+    },
+    {
+      "name": "react-hooks",
+      "description": "React 场景 Hook（useStateRef/useScroll/useEvent/useMergedState 等）。",
+      "primary_entrypoint": "@gpx/common-funcraft"
+    },
+    {
+      "name": "scss-assets",
+      "description": "SCSS 变量与 mixins，已弃用，仅兼容保留。",
+      "primary_entrypoint": "@gpx/common-funcraft/es/styles/variables",
+      "status": "deprecated-compat-only"
+    }
+  ],
+  "architecture": {
+    "layers": [
+      {
+        "name": "public-surface",
+        "paths": [
+          "src/index.ts",
+          "src/utils/index.ts",
+          "src/hook/index.ts"
+        ]
+      },
+      {
+        "name": "capability-modules",
+        "paths": [
+          "src/utils/*",
+          "src/hook/*"
+        ]
+      },
+      {
+        "name": "compat-assets",
+        "paths": [
+          "src/styles/*"
+        ],
+        "status": "deprecated-compat-only"
+      }
+    ],
+    "boundaries": [
+      "优先按模块家族选择入口，不应把根入口作为所有场景默认入口。",
+      "非 React 场景应优先使用 utils 子入口，避免框架耦合。",
+      "SCSS 资产不再扩展，只做兼容维护。"
+    ],
+    "forbidden_import_patterns": [
+      {
+        "pattern": "@gpx/common-funcraft (在旧版 webpack Vue 项目中直接全量导入)",
+        "why": "可能导致 React Hook 相关代码被错误打包",
+        "recommended": "@gpx/common-funcraft/es/utils"
+      }
+    ]
+  },
+  "constraints": [
+    "useScroll 仍属于实验性能力，接入前需验证行为契约。",
+    "类型声明中的请求相关类型已迁移至 @gpx/ca-core，本包仅保留兼容导出。",
+    "SCSS 仅兼容保留，新功能不应继续绑定到 SCSS 资产。"
+  ],
+  "recipes_index": [
+    {
+      "id": "select-entrypoint-by-runtime",
+      "path": "docs/recipes/select-entrypoint-by-runtime.md",
+      "task_family": "entrypoint-selection"
+    },
+    {
+      "id": "legacy-webpack-vue-safe-import",
+      "path": "docs/recipes/legacy-webpack-vue-safe-import.md",
+      "task_family": "legacy-compat-integration"
+    }
+  ],
+  "examples_index": [
+    {
+      "path": "docs/examples/index.md",
+      "description": "对 guide 示例的索引入口。"
+    }
+  ],
+  "doc_index": [
+    "README.md",
+    "docs/package/overview.md",
+    "docs/package/architecture.md",
+    "docs/package/exports.md",
+    "docs/package/constraints.md",
+    "docs/package/glossary.md",
+    "docs/recipes/select-entrypoint-by-runtime.md",
+    "docs/recipes/legacy-webpack-vue-safe-import.md",
+    "docs/examples/index.md"
+  ],
+  "roadmap_todos": [
+    "将产物目录重构为 common/vue/react 三类独立构建目录。",
+    "基于新目录更新 exports 并提供旧入口迁移映射。",
+    "补充分目录后的构建与发布验收清单。"
+  ],
+  "ai_hints": {
+    "recommended_read_order": [
+      "README.md",
+      "package.manifest.json",
+      "docs/package/overview.md",
+      "docs/package/architecture.md",
+      "docs/package/exports.md",
+      "docs/package/constraints.md",
+      "docs/package/glossary.md",
+      "docs/recipes/select-entrypoint-by-runtime.md",
+      "docs/recipes/legacy-webpack-vue-safe-import.md",
+      "docs/examples/index.md"
+    ],
+    "progressive_disclosure_nodes": [
+      {
+        "id": "entry",
+        "asset": "README.md",
+        "role": "entry",
+        "next": [
+          "manifest",
+          "overview"
+        ]
+      },
+      {
+        "id": "manifest",
+        "asset": "package.manifest.json",
+        "role": "reference",
+        "next": [
+          "exports",
+          "architecture",
+          "constraints",
+          "glossary",
+          "recipes",
+          "examples"
+        ]
+      },
+      {
+        "id": "overview",
+        "asset": "docs/package/overview.md",
+        "role": "overview",
+        "next": [
+          "docs/package/architecture.md",
+          "docs/package/exports.md"
+        ]
+      },
+      {
+        "id": "architecture",
+        "asset": "docs/package/architecture.md",
+        "role": "reference",
+        "next": [
+          "docs/package/constraints.md"
+        ]
+      },
+      {
+        "id": "exports",
+        "asset": "docs/package/exports.md",
+        "role": "reference",
+        "next": [
+          "docs/recipes/select-entrypoint-by-runtime.md",
+          "docs/recipes/legacy-webpack-vue-safe-import.md"
+        ]
+      },
+      {
+        "id": "constraints",
+        "asset": "docs/package/constraints.md",
+        "role": "constraint",
+        "next": [
+          "docs/recipes/select-entrypoint-by-runtime.md"
+        ]
+      },
+      {
+        "id": "glossary",
+        "asset": "docs/package/glossary.md",
+        "role": "glossary",
+        "next": [
+          "docs/package/exports.md"
+        ]
+      },
+      {
+        "id": "recipes",
+        "asset": "docs/recipes/select-entrypoint-by-runtime.md",
+        "role": "recipe",
+        "next": [
+          "docs/recipes/legacy-webpack-vue-safe-import.md",
+          "docs/examples/index.md"
+        ]
+      },
+      {
+        "id": "examples",
+        "asset": "docs/examples/index.md",
+        "role": "example",
+        "next": []
+      }
+    ]
+  }
+}
