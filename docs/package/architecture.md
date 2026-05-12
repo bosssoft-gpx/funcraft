@@ -20,7 +20,7 @@
 
 ### Layer: compatibility assets
 
-- 职责：承载历史兼容资产（`src/styles/*`）。
+- 职责：承载历史兼容资产（`src/styles/*`、`src/types/typing.ts`）。
 - 允许依赖：仅兼容维护需要。
 - 不允许：新增功能继续绑定到该层。
 
@@ -29,6 +29,7 @@
 - Vue/非 React 项目应优先走 `es/utils` 子入口，避免根入口引入 React Hook 语义。
 - 根入口适用于支持 Tree-shaking 的 React 场景，不应视为所有项目默认入口。
 - SCSS 资产仅兼容保留，不应继续扩展。
+- 请求相关类型的真实归属已迁移到 `@gpx/ca-core`，当前仓库中的兼容类型不应通过深路径重新暴露给外部项目。
 
 违反后果：
 
@@ -45,12 +46,14 @@
 
 - React 场景：`@gpx/common-funcraft`（必要时再按文档收敛到子入口）。
 - Vue/旧构建场景：`@gpx/common-funcraft/es/utils`。
-- 历史样式兼容场景：仅临时使用 `es/styles/variables`，并规划迁移。
+- 历史样式兼容场景：仅把 `src/styles/*` 当作迁移盘点来源，不应假设 npm dist 已提供稳定可用入口。
+- 历史请求类型兼容场景：优先迁移到 `@gpx/ca-core`，不要依赖隐藏深路径。
 
 ## Forbidden Paths
 
 - 旧版 webpack Vue 项目直接全量导入根入口。
 - 把 SCSS 兼容层当作长期演进主路径。
+- 通过 `es/types/*`、`lib/types/*` 等深路径消费未公开导出的兼容类型。
 - 未经文档同步直接新增面向外部的导出入口。
 
 ## Runtime / Provider / SSR Notes

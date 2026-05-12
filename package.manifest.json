@@ -1,19 +1,122 @@
 {
+  "schema_profile": "package-profile-v1",
+  "kind": "package",
   "name": "@gpx/common-funcraft",
-  "version": "0.3.0",
-  "knowledge_pack_version": "1.0.0",
-  "archetype": "utility",
-  "public_mission": "为前端项目提供可复用的通用函数、React Hook 与兼容性工具，同时明确不同运行时和框架的入口选择边界。",
-  "non_goals": [
-    "不作为完整 UI 组件库或设计系统载体",
-    "不再作为新项目的主样式方案承载方（SCSS 仅兼容保留）"
-  ],
-  "deprecations": [
+  "version": "0.3.1",
+  "display_name": "Funcraft",
+  "summary": "面向前端项目的 utility 包，提供通用工具函数、React Hook 与少量兼容迁移资产，并通过入口选择规则隔离不同运行时和框架风险。",
+  "canonical_manifest": "package.manifest.json",
+  "knowledge_entry": "README.md",
+  "source_meta": {
+    "profile_version": "1.0.0",
+    "archetype": "utility",
+    "generated_by": "package-enhancer",
+    "last_enhanced": "2026-04-28",
+    "diagnosis_source": ".context/package-doctor/diagnosis.yaml",
+    "evidence": [
+      {
+        "asset": "package.json",
+        "fact": "公开 exports 仅声明 root、./es/utils、./es/styles/variables。"
+      },
+      {
+        "asset": "src/index.ts",
+        "fact": "根入口只聚合 hook 与 utils。"
+      },
+      {
+        "asset": "tsup.config.ts",
+        "fact": "构建入口仅覆盖 src/**/*.ts，不复制 SCSS 资产。"
+      },
+      {
+        "asset": "docs/package/exports.md",
+        "fact": "文档已明确 SCSS dist 不稳定、请求类型无稳定 public entrypoint。"
+      }
+    ],
+    "exports_index_followup": "resolved"
+  },
+  "docs_index": [
     {
-      "domain": "scss-assets",
-      "status": "deprecated-compat-only",
-      "reason": "项目已采用新的样式管理方案，SCSS 仅为旧版本兼容保留。",
-      "policy": "仅做兼容维护，不推荐新增依赖。"
+      "id": "readme",
+      "path": "README.md",
+      "type": "entry",
+      "role": "knowledge entrypoint",
+      "confidence": "high"
+    },
+    {
+      "id": "package-overview",
+      "path": "docs/package/overview.md",
+      "type": "overview",
+      "role": "package positioning and problem space",
+      "confidence": "high"
+    },
+    {
+      "id": "package-architecture",
+      "path": "docs/package/architecture.md",
+      "type": "reference",
+      "role": "layers, boundaries, extension points",
+      "confidence": "high"
+    },
+    {
+      "id": "package-exports",
+      "path": "docs/package/exports.md",
+      "type": "reference",
+      "role": "entrypoint selection and public surface rules",
+      "confidence": "high"
+    },
+    {
+      "id": "package-constraints",
+      "path": "docs/package/constraints.md",
+      "type": "constraint",
+      "role": "must rules, forbidden imports, anti-patterns",
+      "confidence": "high"
+    },
+    {
+      "id": "package-glossary",
+      "path": "docs/package/glossary.md",
+      "type": "glossary",
+      "role": "package terminology and semantic boundaries",
+      "confidence": "high"
+    },
+    {
+      "id": "examples-index",
+      "path": "docs/examples/index.md",
+      "type": "example",
+      "role": "guide-to-recipe example mapping",
+      "confidence": "medium"
+    },
+    {
+      "id": "guide-hooks",
+      "path": "docs/guide/hook.md",
+      "type": "guide",
+      "role": "React Hook API usage notes",
+      "confidence": "medium"
+    },
+    {
+      "id": "guide-utils",
+      "path": "docs/guide/function.md",
+      "type": "guide",
+      "role": "utility function usage notes",
+      "confidence": "medium"
+    },
+    {
+      "id": "guide-scss",
+      "path": "docs/guide/scss.md",
+      "type": "guide",
+      "role": "SCSS compat migration reference, not stable public API",
+      "confidence": "medium"
+    },
+    {
+      "id": "guide-types",
+      "path": "docs/guide/type.md",
+      "type": "guide",
+      "role": "request type migration reference, not stable public API",
+      "confidence": "medium"
+    },
+    {
+      "id": "changelog",
+      "path": "docs/CHANGELOG.md",
+      "type": "changelog",
+      "role": "release history",
+      "confidence": "medium"
     }
   ],
   "entrypoints": [
@@ -24,14 +127,19 @@
         "utils",
         "react-hooks"
       ],
+      "environment": [
+        "React",
+        "tree-shaking capable bundlers"
+      ],
       "recommended_for": [
         "React 项目",
-        "支持 Tree-shaking 的构建环境"
+        "需要 Hook + utils 一体消费的模块"
       ],
       "avoid_when": [
-        "旧版 webpack Vue 项目（全量导入可能引入 React Hook 相关代码）"
+        "旧版 webpack Vue 项目",
+        "非 React 项目只需要通用函数"
       ],
-      "selection_rule": "当环境明确支持按需导入且需要 Hook + utils 一体消费时使用。"
+      "selection_rule": "当运行时为 React 且构建链路支持按需导入时使用；否则优先收窄到 utils 子入口。"
     },
     {
       "specifier": "@gpx/common-funcraft/es/utils",
@@ -39,43 +147,222 @@
       "contains": [
         "utils-only"
       ],
+      "environment": [
+        "Vue",
+        "non-React",
+        "legacy webpack"
+      ],
       "recommended_for": [
         "Vue 项目",
         "非 React 项目",
         "旧版 webpack 项目"
       ],
-      "selection_rule": "当只需要通用函数且希望避免 React Hook 打包影响时优先使用。"
+      "avoid_when": [
+        "需要 React Hook 能力"
+      ],
+      "selection_rule": "当只需要通用函数，或需要避免 React Hook 被打包进非 React 运行时时优先使用。"
     },
     {
       "specifier": "@gpx/common-funcraft/es/styles/variables",
-      "status": "deprecated-compat-only",
+      "status": "declared-but-broken-compat-only",
       "contains": [
         "scss-variables"
       ],
-      "recommended_for": [
-        "旧版本样式迁移期项目"
+      "environment": [
+        "legacy style migration audit only"
       ],
-      "selection_rule": "仅兼容场景使用，新项目不推荐。"
+      "recommended_for": [
+        "仓库内历史样式迁移盘点"
+      ],
+      "avoid_when": [
+        "新项目接入",
+        "依赖稳定 npm dist 的外部项目"
+      ],
+      "selection_rule": "仅作为兼容盘点信号；不要假设发布包中存在稳定可消费的 SCSS dist。"
     }
   ],
   "module_families": [
     {
       "name": "utils",
-      "description": "通用工具函数集合（number/validation/view/object/templateBuilder 等）。",
-      "primary_entrypoint": "@gpx/common-funcraft/es/utils"
+      "description": "通用工具函数集合，覆盖 number、validation、view、object、file、templateBuilder 与少量 Vue 安全注册辅助。",
+      "primary_entrypoint": "@gpx/common-funcraft/es/utils",
+      "status": "stable",
+      "selection_rule": "默认优先用于 Vue、非 React、旧构建工具链和只需要工具函数的场景。"
     },
     {
       "name": "react-hooks",
-      "description": "React 场景 Hook（useStateRef/useScroll/useEvent/useMergedState 等）。",
-      "primary_entrypoint": "@gpx/common-funcraft"
+      "description": "React 场景 Hook，包含 useStateRef、useScroll、useEvent、useMergedState、useReactiveRef 等。",
+      "primary_entrypoint": "@gpx/common-funcraft",
+      "status": "stable-with-experimental-members",
+      "selection_rule": "仅在 React 运行时使用；useScroll 接入前需做项目内行为验证。"
     },
     {
       "name": "scss-assets",
-      "description": "SCSS 变量与 mixins，已弃用，仅兼容保留。",
+      "description": "历史 SCSS 变量与 mixins，已弃用且当前 dist 不保证稳定可消费。",
       "primary_entrypoint": "@gpx/common-funcraft/es/styles/variables",
-      "status": "deprecated-compat-only"
+      "status": "declared-but-broken-compat-only",
+      "selection_rule": "只作为迁移盘点事实来源，不作为新样式方案入口。"
+    },
+    {
+      "name": "request-types-compat",
+      "description": "历史请求相关类型，稳定归属已迁移到 @gpx/ca-core。",
+      "primary_entrypoint": null,
+      "status": "hidden-compat-only",
+      "selection_rule": "新代码和迁移目标都应使用 @gpx/ca-core，不应依赖 funcraft 深路径。"
     }
   ],
+  "exports_index": [
+    {
+      "id": "entrypoint-root",
+      "name": "@gpx/common-funcraft",
+      "kind": "entrypoint",
+      "role": "public-api",
+      "summary": "React 项目或支持 Tree-shaking 的环境中消费 Hook 与 utils。",
+      "stability": "stable",
+      "entrypoints": [
+        "@gpx/common-funcraft"
+      ],
+      "module_families": [
+        "utils",
+        "react-hooks"
+      ],
+      "selection_rule": "React + 可 Tree-shaking 时使用；非 React 或旧构建环境避免默认使用。",
+      "source_meta": {
+        "specifier": ".",
+        "package_import": "@gpx/common-funcraft",
+        "types": "./types/index.d.ts",
+        "import": "./es/index.js",
+        "require": "./lib/index.js",
+        "evidence": "package.json exports['.']; src/index.ts"
+      }
+    },
+    {
+      "id": "entrypoint-utils",
+      "name": "@gpx/common-funcraft/es/utils",
+      "kind": "entrypoint",
+      "role": "featured",
+      "summary": "Vue、非 React 或旧 webpack 项目中的低耦合工具函数入口。",
+      "stability": "stable",
+      "entrypoints": [
+        "@gpx/common-funcraft/es/utils"
+      ],
+      "module_families": [
+        "utils"
+      ],
+      "selection_rule": "只需要 utils 或需要规避 React Hook 打包风险时优先使用。",
+      "source_meta": {
+        "specifier": "./es/utils",
+        "package_import": "@gpx/common-funcraft/es/utils",
+        "types": "./types/utils/index.d.ts",
+        "import": "./es/utils/index.js",
+        "require": "./lib/utils/index.js",
+        "evidence": "package.json exports['./es/utils']; docs/package/exports.md"
+      }
+    },
+    {
+      "id": "entrypoint-styles-variables",
+      "name": "@gpx/common-funcraft/es/styles/variables",
+      "kind": "entrypoint",
+      "role": "compat-only",
+      "summary": "历史 SCSS 迁移盘点信号。",
+      "stability": "declared-but-broken-compat-only",
+      "entrypoints": [
+        "@gpx/common-funcraft/es/styles/variables"
+      ],
+      "module_families": [
+        "scss-assets"
+      ],
+      "selection_rule": "不要作为稳定 public API 接入；如需样式能力，应迁移到项目自身样式基建。",
+      "source_meta": {
+        "specifier": "./es/styles/variables",
+        "package_import": "@gpx/common-funcraft/es/styles/variables",
+        "types": null,
+        "import": "./es/styles/variables.scss",
+        "require": null,
+        "evidence": "package.json exports['./es/styles/variables']; tsup.config.ts; docs/guide/scss.md"
+      }
+    }
+  ],
+  "constraints": [
+    "非 React 或旧版 webpack Vue 项目默认优先使用 @gpx/common-funcraft/es/utils。",
+    "根入口 @gpx/common-funcraft 仅适合 React 或确认支持按需导入的构建环境。",
+    "useScroll 仍属于实验性能力，接入前需验证滚动、resize、容器替换与 iframe 行为。",
+    "请求相关类型已迁移至 @gpx/ca-core，本包不提供稳定公共类型入口。",
+    "不要依赖 @gpx/common-funcraft/es/types/*、lib/types/* 等隐藏深路径。",
+    "SCSS 资产仅兼容保留，新功能不应继续绑定到 funcraft SCSS。",
+    "当前发布产物未提供稳定可消费的 SCSS dist，不应将历史导入示例当作现行 public API。",
+    "新增公开入口必须同步更新 package.manifest.json、docs/package/exports.md、constraints 与相关 recipe。"
+  ],
+  "recipes_index": [
+    {
+      "id": "select-entrypoint-by-runtime",
+      "path": "docs/recipes/select-entrypoint-by-runtime.md",
+      "type": "recipe",
+      "task_family": "entrypoint-selection",
+      "entrypoints": [
+        "@gpx/common-funcraft",
+        "@gpx/common-funcraft/es/utils",
+        "@gpx/common-funcraft/es/styles/variables"
+      ],
+      "status": "ready"
+    },
+    {
+      "id": "legacy-webpack-vue-safe-import",
+      "path": "docs/recipes/legacy-webpack-vue-safe-import.md",
+      "type": "recipe",
+      "task_family": "legacy-compat-integration",
+      "entrypoints": [
+        "@gpx/common-funcraft/es/utils"
+      ],
+      "status": "ready"
+    },
+    {
+      "id": "integrate-react-hooks-in-react-runtime",
+      "path": "docs/recipes/integrate-react-hooks-in-react-runtime.md",
+      "type": "recipe",
+      "task_family": "react-hook-integration",
+      "entrypoints": [
+        "@gpx/common-funcraft"
+      ],
+      "status": "ready"
+    },
+    {
+      "id": "phase-out-scss-compat-assets",
+      "path": "docs/recipes/phase-out-scss-compat-assets.md",
+      "type": "recipe",
+      "task_family": "scss-compat-migration",
+      "entrypoints": [
+        "@gpx/common-funcraft/es/styles/variables"
+      ],
+      "status": "ready"
+    },
+    {
+      "id": "migrate-request-types-to-ca-core",
+      "path": "docs/recipes/migrate-request-types-to-ca-core.md",
+      "type": "recipe",
+      "task_family": "type-compat-migration",
+      "entrypoints": [
+        "@gpx/ca-core"
+      ],
+      "status": "ready"
+    }
+  ],
+  "public_surface": {
+    "summary": "正式公共消费面由根入口和 utils 子入口组成；SCSS 入口仅是兼容残留信号，请求类型不属于本包稳定公共表面。",
+    "stable": [
+      "@gpx/common-funcraft",
+      "@gpx/common-funcraft/es/utils"
+    ],
+    "compat_only": [
+      "@gpx/common-funcraft/es/styles/variables"
+    ],
+    "internal_or_hidden": [
+      "src/types/typing.ts",
+      "es/types/*",
+      "lib/types/*",
+      "src/styles/*"
+    ]
+  },
   "architecture": {
     "layers": [
       {
@@ -84,74 +371,77 @@
           "src/index.ts",
           "src/utils/index.ts",
           "src/hook/index.ts"
-        ]
+        ],
+        "role": "对外聚合语义入口。"
       },
       {
         "name": "capability-modules",
         "paths": [
           "src/utils/*",
           "src/hook/*"
-        ]
+        ],
+        "role": "真实工具函数与 Hook 实现层。"
       },
       {
         "name": "compat-assets",
         "paths": [
-          "src/styles/*"
+          "src/styles/*",
+          "src/types/typing.ts"
         ],
+        "role": "历史兼容资产，仅用于迁移参考或盘点。",
         "status": "deprecated-compat-only"
       }
     ],
     "boundaries": [
       "优先按模块家族选择入口，不应把根入口作为所有场景默认入口。",
       "非 React 场景应优先使用 utils 子入口，避免框架耦合。",
-      "SCSS 资产不再扩展，只做兼容维护。"
+      "SCSS 资产不再扩展，只做兼容维护和迁移盘点。",
+      "请求相关类型的稳定归属已迁移到 @gpx/ca-core，不应通过深路径重新暴露。"
     ],
     "forbidden_import_patterns": [
       {
         "pattern": "@gpx/common-funcraft (在旧版 webpack Vue 项目中直接全量导入)",
-        "why": "可能导致 React Hook 相关代码被错误打包",
+        "why": "可能导致 React Hook 相关代码被错误打包。",
         "recommended": "@gpx/common-funcraft/es/utils"
+      },
+      {
+        "pattern": "@gpx/common-funcraft/es/styles/mixins",
+        "why": "exports 未声明且 dist 未稳定提供该入口。",
+        "recommended": "迁移到项目自身样式基建。"
+      },
+      {
+        "pattern": "@gpx/common-funcraft/es/types/* 或 lib/types/*",
+        "why": "这些类型文件不是稳定公共表面，会固化隐藏深路径依赖。",
+        "recommended": "@gpx/ca-core"
       }
     ]
   },
-  "constraints": [
-    "useScroll 仍属于实验性能力，接入前需验证行为契约。",
-    "类型声明中的请求相关类型已迁移至 @gpx/ca-core，本包仅保留兼容导出。",
-    "SCSS 仅兼容保留，新功能不应继续绑定到 SCSS 资产。"
-  ],
-  "recipes_index": [
+  "deprecations": [
     {
-      "id": "select-entrypoint-by-runtime",
-      "path": "docs/recipes/select-entrypoint-by-runtime.md",
-      "task_family": "entrypoint-selection"
+      "domain": "scss-assets",
+      "status": "deprecated-compat-only",
+      "reason": "项目已采用新的样式管理方案，SCSS 仅为旧版本兼容保留。",
+      "policy": "仅做兼容维护和迁移盘点，不推荐新增依赖。"
     },
     {
-      "id": "legacy-webpack-vue-safe-import",
-      "path": "docs/recipes/legacy-webpack-vue-safe-import.md",
-      "task_family": "legacy-compat-integration"
+      "domain": "request-types-compat",
+      "status": "migrated-hidden-compat",
+      "reason": "请求相关类型的稳定归属已迁移至 @gpx/ca-core，本仓库仅保留迁移残留定义。",
+      "policy": "外部项目不应继续依赖本包的请求类型导出或深路径。"
     }
   ],
   "examples_index": [
     {
       "path": "docs/examples/index.md",
-      "description": "对 guide 示例的索引入口。"
+      "type": "example-index",
+      "description": "对 guide 示例与 recipe 的索引入口；当前不是独立可运行 demos。"
     }
-  ],
-  "doc_index": [
-    "README.md",
-    "docs/package/overview.md",
-    "docs/package/architecture.md",
-    "docs/package/exports.md",
-    "docs/package/constraints.md",
-    "docs/package/glossary.md",
-    "docs/recipes/select-entrypoint-by-runtime.md",
-    "docs/recipes/legacy-webpack-vue-safe-import.md",
-    "docs/examples/index.md"
   ],
   "roadmap_todos": [
     "将产物目录重构为 common/vue/react 三类独立构建目录。",
     "基于新目录更新 exports 并提供旧入口迁移映射。",
-    "补充分目录后的构建与发布验收清单。"
+    "补充分目录后的构建与发布验收清单。",
+    "若决定保留 SCSS public API，需补齐构建复制、发布校验与 docs 反向刷新；否则应移除声明入口。"
   ],
   "ai_hints": {
     "recommended_read_order": [
@@ -164,13 +454,27 @@
       "docs/package/glossary.md",
       "docs/recipes/select-entrypoint-by-runtime.md",
       "docs/recipes/legacy-webpack-vue-safe-import.md",
+      "docs/recipes/integrate-react-hooks-in-react-runtime.md",
+      "docs/recipes/phase-out-scss-compat-assets.md",
+      "docs/recipes/migrate-request-types-to-ca-core.md",
       "docs/examples/index.md"
+    ],
+    "stop_rules": [
+      "只做入口选型时，读完 docs/package/exports.md 与 docs/package/constraints.md 即可停止。",
+      "只接入 React Hook 时，读完 integrate-react-hooks recipe 与 docs/guide/hook.md 即可停止。",
+      "处理 SCSS 或请求类型迁移时，读完对应 recipe 与 guide 后不要扩散到不相关模块。"
+    ],
+    "escalation_rules": [
+      "出现 SCSS 可用性争议时，回读 tsup.config.ts、docs/guide/scss.md 与 package.json exports。",
+      "出现请求类型归属争议时，回读 src/types/typing.ts、docs/guide/type.md 与 migrate-request-types recipe。",
+      "出现 useScroll 行为争议时，升级读取 test/hook/useScroll/* 与 docs/guide/hook.md。"
     ],
     "progressive_disclosure_nodes": [
       {
         "id": "entry",
         "asset": "README.md",
         "role": "entry",
+        "confidence": "high",
         "next": [
           "manifest",
           "overview"
@@ -180,12 +484,14 @@
         "id": "manifest",
         "asset": "package.manifest.json",
         "role": "reference",
+        "confidence": "high",
         "next": [
-          "exports",
+          "overview",
           "architecture",
+          "exports",
           "constraints",
           "glossary",
-          "recipes",
+          "recipe-entrypoint",
           "examples"
         ]
       },
@@ -193,57 +499,102 @@
         "id": "overview",
         "asset": "docs/package/overview.md",
         "role": "overview",
+        "confidence": "high",
         "next": [
-          "docs/package/architecture.md",
-          "docs/package/exports.md"
+          "architecture",
+          "exports"
         ]
       },
       {
         "id": "architecture",
         "asset": "docs/package/architecture.md",
         "role": "reference",
+        "confidence": "high",
         "next": [
-          "docs/package/constraints.md"
+          "constraints"
         ]
       },
       {
         "id": "exports",
         "asset": "docs/package/exports.md",
         "role": "reference",
+        "confidence": "high",
         "next": [
-          "docs/recipes/select-entrypoint-by-runtime.md",
-          "docs/recipes/legacy-webpack-vue-safe-import.md"
+          "recipe-entrypoint",
+          "recipe-legacy-vue",
+          "recipe-react-hooks",
+          "recipe-scss-phase-out",
+          "recipe-request-types-migration"
         ]
       },
       {
         "id": "constraints",
         "asset": "docs/package/constraints.md",
         "role": "constraint",
+        "confidence": "high",
         "next": [
-          "docs/recipes/select-entrypoint-by-runtime.md"
+          "recipe-entrypoint"
         ]
       },
       {
         "id": "glossary",
         "asset": "docs/package/glossary.md",
         "role": "glossary",
+        "confidence": "high",
         "next": [
-          "docs/package/exports.md"
+          "exports"
         ]
       },
       {
-        "id": "recipes",
+        "id": "recipe-entrypoint",
         "asset": "docs/recipes/select-entrypoint-by-runtime.md",
         "role": "recipe",
+        "confidence": "high",
         "next": [
-          "docs/recipes/legacy-webpack-vue-safe-import.md",
-          "docs/examples/index.md"
+          "examples"
+        ]
+      },
+      {
+        "id": "recipe-legacy-vue",
+        "asset": "docs/recipes/legacy-webpack-vue-safe-import.md",
+        "role": "recipe",
+        "confidence": "high",
+        "next": [
+          "examples"
+        ]
+      },
+      {
+        "id": "recipe-react-hooks",
+        "asset": "docs/recipes/integrate-react-hooks-in-react-runtime.md",
+        "role": "recipe",
+        "confidence": "high",
+        "next": [
+          "examples"
+        ]
+      },
+      {
+        "id": "recipe-scss-phase-out",
+        "asset": "docs/recipes/phase-out-scss-compat-assets.md",
+        "role": "recipe",
+        "confidence": "high",
+        "next": [
+          "examples"
+        ]
+      },
+      {
+        "id": "recipe-request-types-migration",
+        "asset": "docs/recipes/migrate-request-types-to-ca-core.md",
+        "role": "recipe",
+        "confidence": "high",
+        "next": [
+          "examples"
         ]
       },
       {
         "id": "examples",
         "asset": "docs/examples/index.md",
         "role": "example",
+        "confidence": "medium",
         "next": []
       }
     ]

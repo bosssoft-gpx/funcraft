@@ -6,6 +6,10 @@ UI 样式风格、减少样式代码重复。
 > ⚠️ **Deprecated / 兼容保留声明**  
 > SCSS 能力已不再作为该库的主推荐方案，当前仅用于兼容旧版本项目。  
 > 新项目请采用新的样式管理方案，不建议新增对本页能力的依赖。
+>
+> ⚠️ **当前导出状态说明**
+> 当前发布产物未提供稳定可消费的 SCSS dist 入口；本页内容用于盘点历史变量与 mixins，方便仓库内维护或迁移清点。
+> 若你是外部项目消费者，请优先阅读 `docs/recipes/phase-out-scss-compat-assets.md`，不要直接照搬旧导入语句。
 
 ## 🚀 特性
 
@@ -17,20 +21,15 @@ UI 样式风格、减少样式代码重复。
 
 ## 📌 如何引用
 
-推荐使用 `@use` 语法引用，避免全局污染：
+以下导入写法仅用于说明历史设计意图，不应视为当前稳定公共 API：
 
 ```scss
+// historical-intent only
 @use "@gpx/common-funcraft/es/styles/variables" as *;
 @use "@gpx/common-funcraft/es/styles/mixins" as mixins;
-
-// 使用示例：
-.button {
-  background-color: $c-primary;
-  color: white;
-
-  @include mixins.full-content;
-}
 ```
+
+如果你正在仓库内做历史样式迁移，请以 `src/styles/variables.scss` 与 `src/styles/mixins.scss` 为事实来源，先完成替换清单，再决定是否保留兼容层。
 
 ---
 

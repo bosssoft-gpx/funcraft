@@ -4,6 +4,8 @@
 
 > **注意**：以下类型声明已迁移至 [`@gpx/ca-core`](http://192.168.8.48/yangjunhao/ca-core) 维护，建议新项目直接使用该包中的类型定义。
 > 本项目将不再提供该部分的更新与维护。以下内容仅供参考。
+>
+> **当前公共导出说明**：本包当前没有为这些请求相关类型提供稳定 public entrypoint。若你还能在源码或构建目录中看到对应文件，请将其视为迁移残留，而不是建议依赖的 API 面。
 
 ## 🚀 辅助类型列表
 
@@ -157,6 +159,6 @@ const getUserInfo: TPossibleRequestFunction<User> = async (config) => {
 - 📆 [更新日志](../CHANGELOG.md)
 
 ---
-📌 **更多类型声明持续更新中，请关注 [CHANGELOG.md](../CHANGELOG.md)。**
+📌 若你仍在迁移历史项目，请结合 `docs/recipes/migrate-request-types-to-ca-core.md` 制定收口步骤，而不是继续扩散深路径依赖。
 
 📚 返回 [README](../../README.md) 查看完整文档索引。

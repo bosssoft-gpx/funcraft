@@ -11,12 +11,15 @@ children:
   - "docs/package/glossary.md"
   - "docs/recipes/select-entrypoint-by-runtime.md"
   - "docs/recipes/legacy-webpack-vue-safe-import.md"
+  - "docs/recipes/integrate-react-hooks-in-react-runtime.md"
+  - "docs/recipes/phase-out-scss-compat-assets.md"
+  - "docs/recipes/migrate-request-types-to-ca-core.md"
   - "docs/examples/index.md"
 ---
 
 # Funcraft 📦
 
-🚀 **@gpx/common-funcraft** 是一个模块化的前端工具库，集成了 **高质量 TypeScript 工具函数、可复用的 React Hook 以及常用类型声明**，帮助开发者更高效地构建现代前端应用。  
+🚀 **@gpx/common-funcraft** 是一个模块化的前端工具库，集成了 **高质量 TypeScript 工具函数、可复用的 React Hook 以及少量兼容保留资产**，帮助开发者更高效地构建现代前端应用。
 ⚠️ SCSS 资产已进入兼容保留阶段（deprecated），仅用于旧版本项目过渡，不建议新项目继续采用。
 
 ## ✨ 特性
@@ -25,12 +28,13 @@ children:
 - 🎨 **SCSS 变量/Mixins（兼容保留）** —— 仅保留旧版本兼容，不再作为主推荐方案
 - 🛠 **实用工具函数** —— 覆盖数值格式化、文件处理、DOM 操作等常见场景
 - ⚛️ **可复用的 React Hook** —— 提供 `useStateRef` 等高效状态管理 Hook
-- 📜 **完整 TypeScript 类型声明** —— 提供清晰明确的类型定义，改善开发体验
+- 📜 **兼容性类型迁移指引** —— 历史请求类型已迁移到 `@gpx/ca-core`，本仓库仅保留迁移参考
 - 🔥 **支持 Node.js & 浏览器端** —— 可广泛用于 Web 和 Node.js 服务端应用
 
 ## ⚠️ SCSS 兼容说明（Deprecated）
 
 - SCSS 变量和 mixins 仅作为**兼容旧版本**而保留。
+- 当前发布产物未提供稳定可用的 SCSS dist 导出，文档中的 SCSS 内容仅用于迁移盘点与仓库内维护参考。
 - 新项目请使用新的样式管理方案，不再建议新增对本库 SCSS 资产的依赖。
 - 后续版本会逐步收敛 SCSS 相关文档与导出能力，具体请见 package 文档中的 TODO/路线图。
 
@@ -43,6 +47,7 @@ children:
 
 - Vue/非 React 项目优先使用 `@gpx/common-funcraft/es/utils` 等更窄入口。
 - React 项目可按需使用根入口或 Hook 相关能力。
+- 历史请求类型请直接迁移到 `@gpx/ca-core`，不要依赖本包的深路径隐藏产物。
 
 ## 📥 安装
 
@@ -78,12 +83,15 @@ yarn add @gpx/common-funcraft
 - 📚 **[术语表](docs/package/glossary.md)**
 - 🧪 **[Recipes：入口选择](docs/recipes/select-entrypoint-by-runtime.md)**
 - 🧱 **[Recipes：旧版 webpack Vue 安全导入](docs/recipes/legacy-webpack-vue-safe-import.md)**
+- ⚛️ **[Recipes：React Hook 接入](docs/recipes/integrate-react-hooks-in-react-runtime.md)**
+- 🎨 **[Recipes：退出 SCSS 兼容资产](docs/recipes/phase-out-scss-compat-assets.md)**
+- 📜 **[Recipes：请求类型迁移到 ca-core](docs/recipes/migrate-request-types-to-ca-core.md)**
 - 🗂 **[Examples 索引](docs/examples/index.md)**
 
 - 📌 **[React Hook 使用指南](docs/guide/hook.md)**
 - 🎨 **[SCSS 变量 & Mixin 说明](docs/guide/scss.md)**
 - 🛠 **[工具函数使用指南](docs/guide/function.md)**
-- 📜 **[类型声明说明](docs/guide/type.md)**
+- 📜 **[类型兼容说明](docs/guide/type.md)**
 - 📆 **[更新日志](docs/CHANGELOG.md)**
 
 ## 🛣 TODO（构建导出目录重构）

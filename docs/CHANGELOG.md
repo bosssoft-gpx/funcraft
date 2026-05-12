@@ -4,6 +4,21 @@
 
 ---
 
+## [0.3.1] - 2026-05-12
+
+### 📝 文档
+
+- 收敛 package knowledge pack 到 `package-profile-v1`，补齐 `docs_index`、`exports_index`、`recipes_index` 与 progressive disclosure 导航。
+- 增加 React Hook 接入、SCSS 兼容资产退出、请求类型迁移到 `@gpx/ca-core` 的任务型 recipes。
+- 明确 SCSS dist 当前不是稳定 public API，请求相关类型不再作为本包公共入口消费。
+
+### ⚠️ 变更与声明
+
+- `exports_index` 直接输出 builder-facing 形态，包含 `id`、`name`、`entrypoints[]`、`module_families[]`，不再依赖 builder 从 legacy 字段投影。
+- `package.manifest.json` 版本同步更新至 `0.3.1`。
+
+---
+
 ## [0.3.0] - 2026-03-19
 
 ### ✨ 新增
